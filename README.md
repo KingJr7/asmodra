@@ -1,36 +1,49 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Asmodra
 
-## Getting Started
+Plateforme SaaS de generation de flyers IA pour le marche congolais.
 
-First, run the development server:
+## Ce qui est branche
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+- `Supabase` pour auth, base, RLS et storage
+- `OpenRouter`, `Puter.js` ou `Pollinations.ai` (hybride) pour l'optimisation du prompt et la generation image
+- `GPT-5 Image Mini` via OpenRouter pour la sortie visuelle
+- `Yabetoo Pay` pour les abonnements Mobile Money
+- `Sharp` pour le watermark cote serveur sur le plan gratuit
+- `Telegram` pour les alertes de vente
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Regles produit implementees
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+- pas d'historique visuel expose a l'utilisateur
+- credits mensuels par plan + packs de credits
+- watermark obligatoire sur `starter`
+- activation d'abonnement uniquement apres webhook ou reconciliation
+- aucun montant ou quota ne vient du client
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Mise en route
 
-## Learn More
+1. Copier `.env.example` vers `.env.local`
+2. Renseigner les cles Supabase + IA (`AI_PROVIDER=openrouter|puter`), puis Yabetoo et Telegram si tu veux les alertes
+3. Executer le SQL de `supabase/schema.sql` dans Supabase
+4. Lancer `npm run dev`
 
-To learn more about Next.js, take a look at the following resources:
+## Fichiers clefs
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- `lib/` : auth, securite, OpenRouter, Yabetoo, Supabase
+- `app/api/` : routes serveur reelles
+- `components/` : formulaires fonctionnels
+- `SECURITY_RULES.md` : garde-fous a respecter
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Notes de securite
 
-## Deploy on Vercel
+- ne jamais commiter de vraies cles dans `.env`
+- faire tourner le webhook Yabetoo avec `YABETOO_WEBHOOK_SECRET`
+- proteger la reconciliation avec `CRON_SECRET`
+- reserver la `service_role` au serveur uniquement
+- pour Telegram, ajouter `TELEGRAM_BOT_TOKEN` et `TELEGRAM_CHAT_ID`
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Choix du provider IA
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- `AI_PROVIDER=openrouter` : utilise OpenRouter (`OPENROUTER_API_KEY` + modeles OpenRouter)
+- `AI_PROVIDER=puter` : utilise Puter.js (`PUTER_AUTH_TOKEN` + modeles Puter)
+- `AI_PROVIDER=pollinations` : utilise Pollinations.ai (`POLLINATIONS_*`)
+- **Important sur le cout** : Puter fonctionne en modele **user-pays**. Le compte lie a `PUTER_AUTH_TOKEN` peut etre facture selon l'usage/modeles choisis. Ce n'est pas une garantie d'usage illimite sans cout.
