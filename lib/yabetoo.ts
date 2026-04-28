@@ -107,7 +107,11 @@ export async function confirmPaymentIntent(input: {
 }
 
 export async function getPaymentIntent(intentId: string) {
-  return yabetooFetch(`/v1/payment-intents/${intentId}`, {
+  return yabetooFetch<{
+    id?: string;
+    status?: string;
+    [key: string]: unknown;
+  }>(`/v1/payment-intents/${intentId}`, {
     method: "GET",
   });
 }
