@@ -89,6 +89,7 @@ export type PromptOptimizationResult = {
   audience_angle: string;
   layout_strategy: string;
   image_direction: string;
+  commercial_intent_classification: "launch" | "booking" | "premium_positioning" | "general_conversion";
 };
 
 export type GenerationRefinementQuestionType = "text" | "single_choice";

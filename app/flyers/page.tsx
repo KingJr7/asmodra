@@ -46,7 +46,10 @@ export default async function FlyersPage() {
       };
     }),
   );
-  const flyers = rows.filter((row): row is NonNullable<typeof row> => Boolean(row?.imageUrl));
+  const flyers = rows.filter(
+    (row): row is { id: string; title: string; format: string; imageUrl: string } =>
+      typeof row?.imageUrl === "string" && row.imageUrl.length > 0,
+  );
 
   return (
     <main className={styles.page}>

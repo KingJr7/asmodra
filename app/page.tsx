@@ -52,11 +52,11 @@ export default async function Home() {
       <header className={styles.topbar}>
         <span className={styles.logo}>ASMODRA</span>
         <nav className={styles.nav}>
-          <Link href="/flyers">Showcase</Link>
-          <Link href="/generate">Generate</Link>
+          <Link href="/flyers">Voir nos réalisations</Link>
+          <Link href="/generate">Créer un flyer</Link>
           <Link href="/pricing">Tarifs</Link>
           <Link href={isLoggedIn ? "/dashboard" : "/signup"}>
-            {isLoggedIn ? "Mon espace" : "Commencer"}
+            {isLoggedIn ? "Mon compte" : "S'inscrire"}
           </Link>
         </nav>
       </header>
@@ -72,10 +72,10 @@ export default async function Home() {
           </p>
           <div className={styles.heroActions}>
             <Link href={isLoggedIn ? "/generate" : "/signup"} className={styles.primaryCta}>
-              {isLoggedIn ? "Creer une affiche" : "Commencer gratuitement"}
+              {isLoggedIn ? "Commencer une création" : "Essayer gratuitement"}
             </Link>
             <Link href="/pricing" className={styles.ghostCta}>
-              Voir les offres
+              Découvrir nos tarifs
             </Link>
           </div>
         </Reveal>
@@ -156,7 +156,7 @@ export default async function Home() {
                 ))}
               </ul>
               <Link href={isLoggedIn ? "/pricing" : "/signup"} className={styles.planButton}>
-                {isLoggedIn ? "Gerer mon offre" : "Choisir cette offre"}
+                {isLoggedIn ? "Gérer mon abonnement" : "S'abonner"}
               </Link>
             </HoverCard>
           ))}
@@ -167,7 +167,7 @@ export default async function Home() {
         <h2>Tu peux sortir ton prochain visuel maintenant.</h2>
         <p>Va dans le studio, ecris ton brief et laisse Asmodra composer.</p>
         <Link href="/generate" className={styles.finalButton}>
-          Creer mon premier flyer
+          Créer un flyer maintenant
         </Link>
       </Reveal>
     </main>

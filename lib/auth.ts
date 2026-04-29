@@ -9,6 +9,10 @@ import type {
   ViewerRecord,
 } from "@/lib/types";
 
+type AuthenticatedViewer = Omit<ViewerRecord, "profile"> & {
+  profile: ProfileRecord;
+};
+
 export async function getViewer() {
   const supabase = await createClient();
 
@@ -41,6 +45,10 @@ export async function getViewer() {
       .maybeSingle(),
   ]);
 
+  if (!profile) {
+    return null;
+  }
+
   return {
     user,
     profile,
@@ -59,7 +67,7 @@ export async function requireUser() {
     redirect("/login");
   }
 
-  return viewer;
+  return viewer as AuthenticatedViewer;
 }
 
 export async function requireOnboardedUser() {

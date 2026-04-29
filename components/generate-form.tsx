@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState, type FormEvent } from "react";
+import Image from "next/image";
 import type { GenerationRefinementQuestion } from "@/lib/types";
 import styles from "./forms.module.css";
 
@@ -465,7 +466,14 @@ export function GenerateForm({ quotaRemaining, watermarkEnabled }: GenerateFormP
       {result ? (
         <section className={`${styles.panel} ${styles.preview}`}>
           <button type="button" className={styles.previewZoomButton} onClick={() => setPreviewOpen(true)}>
-            <img src={result.imageDataUrl} alt={result.title} className={styles.imagePreview} />
+            <Image
+              src={result.imageDataUrl}
+              alt={result.title}
+              className={styles.imagePreview}
+              width={1200}
+              height={1600}
+              unoptimized
+            />
           </button>
           <div className={styles.actions}>
             <a
@@ -494,10 +502,13 @@ export function GenerateForm({ quotaRemaining, watermarkEnabled }: GenerateFormP
           <button type="button" className={styles.secondaryButton} onClick={() => setPreviewOpen(false)}>
             Fermer
           </button>
-          <img
+          <Image
             src={result.imageDataUrl}
             alt={result.title}
             className={styles.lightboxImage}
+            width={1600}
+            height={2000}
+            unoptimized
             onClick={(event) => event.stopPropagation()}
           />
         </div>

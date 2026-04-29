@@ -1,5 +1,6 @@
 import styles from "./generate.module.css";
 import Link from "next/link";
+import Image from "next/image";
 import { requireOnboardedUser, computeQuotaSnapshot } from "@/lib/auth";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { GenerateForm } from "@/components/generate-form";
@@ -108,7 +109,14 @@ export default async function GeneratePage() {
           <div className={styles.recentGrid}>
             {recentItems.filter(Boolean).slice(0, 4).map((item) => (
               <HoverCard key={item!.id} className={styles.recentCard}>
-                <img src={item!.imageUrl} alt={item!.title} className={styles.recentVisual} loading="lazy" decoding="async" />
+                <Image
+                  src={item!.imageUrl}
+                  alt={item!.title}
+                  className={styles.recentVisual}
+                  width={1200}
+                  height={1600}
+                  unoptimized
+                />
                 <div className={styles.recentMeta}>
                   <strong>{item!.title}</strong>
                   <span>Generation recente</span>

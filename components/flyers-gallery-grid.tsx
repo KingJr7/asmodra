@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import styles from "@/app/shared-page.module.css";
 
 type FlyerItem = {
@@ -20,7 +21,14 @@ export function FlyersGalleryGrid({ flyers }: { flyers: FlyerItem[] }) {
           flyers.map((flyer) => (
             <article key={flyer.id} className={styles.card}>
               <button type="button" className={styles.flyerZoomButton} onClick={() => setActive(flyer)}>
-                <img src={flyer.imageUrl} alt={flyer.title} className={styles.flyerThumb} />
+                <Image
+                  src={flyer.imageUrl}
+                  alt={flyer.title}
+                  className={styles.flyerThumb}
+                  width={1200}
+                  height={1600}
+                  unoptimized
+                />
               </button>
               <h3>{flyer.title}</h3>
               <p className={styles.meta}>{flyer.format}</p>
@@ -46,10 +54,13 @@ export function FlyersGalleryGrid({ flyers }: { flyers: FlyerItem[] }) {
           <button type="button" className={styles.lightboxClose} onClick={() => setActive(null)}>
             Fermer
           </button>
-          <img
+          <Image
             src={active.imageUrl}
             alt={active.title}
             className={styles.lightboxImage}
+            width={1600}
+            height={2000}
+            unoptimized
             onClick={(event) => event.stopPropagation()}
           />
         </div>

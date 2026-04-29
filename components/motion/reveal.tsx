@@ -1,23 +1,24 @@
 "use client";
 
 import { motion, useReducedMotion } from "framer-motion";
-import type { ComponentPropsWithoutRef, ReactNode } from "react";
+import type { HTMLMotionProps } from "framer-motion";
+import type { ReactNode } from "react";
 
 type RevealProps = {
   children: ReactNode;
   className?: string;
   delay?: number;
   y?: number;
-} & ComponentPropsWithoutRef<"div">;
+} & Omit<HTMLMotionProps<"div">, "children">;
 
 export function Reveal({ children, className, delay = 0, y = 18, ...rest }: RevealProps) {
   const reducedMotion = useReducedMotion();
 
   if (reducedMotion) {
     return (
-      <div className={className} {...rest}>
+      <motion.div className={className} {...rest}>
         {children}
-      </div>
+      </motion.div>
     );
   }
 

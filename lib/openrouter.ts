@@ -113,14 +113,15 @@ function condenseImagePrompt(prompt: string) {
 }
 
 function parseJsonBlock<T>(value: string): T {
-  const start = value.indexOf("{");
-  const end = value.lastIndexOf("}");
+  const cleanValue = value.replace(/```json/g, "").replace(/```/g, "").trim();
+  const start = cleanValue.indexOf("{");
+  const end = cleanValue.lastIndexOf("}");
 
   if (start === -1 || end === -1) {
     throw new Error("Prompt optimizer did not return JSON.");
   }
 
-  return JSON.parse(value.slice(start, end + 1)) as T;
+  return JSON.parse(cleanValue.slice(start, end + 1)) as T;
 }
 
 function sanitizeQuestionId(value: string, fallback: string) {
@@ -723,10 +724,14 @@ export async function optimizePrompt(input: {
         role: "system",
         content:
           [
-            "You are an adaptive commercial creative strategist for AI-generated flyers.",
-            "Your job is not to force one flyer style. Infer the best creative direction from the user's commercial goal, sector, tone, audience, format and image references.",
-            "Keep the current creation chain intact: user prompt and references are interpreted by you, then passed to the image model. Do not redesign the workflow, only the creative reasoning.",
-            "Return JSON only with keys: safety, rejection_reason, improved_prompt, short_title, social_caption, visual_strategy, audience_angle, layout_strategy, image_direction.",
+            "You are a Senior Art Director for a top-tier design agency. Your goal is to conceptualize high-converting flyers.",
+            "You are a designer, NOT a transcriber. When you receive input text, your task is to integrate it into the flyer's design identity as if it were a high-end graphic layout.",
+            "NEVER display raw data fields (e.g., 'Nom: Bissgood'). Instead, extract the entity name (Bissgood) and integrate it using creative visual techniques: high-impact typography, decorative containers, or stylized overlays.",
+            "Use the 'mandatory_copy_points' not as a list to be copied, but as content to be styled. If you receive a phone number, treat it as a visual call-to-action anchor in the design hierarchy.",
+            "Follow the 'Show, don't tell' principle: if a business name is provided, style it as a brand logo. If a service is provided, style it as a bold headline. Avoid list-based formatting at all costs.",
+            "Ensure the visual flow of the flyer guides the eye from the main offer (Hero) to the contact point (CTA).",
+            "Maintain your professional African graphic designer aesthetic as established in previous sections, but prioritize the creative integration of copy over literal formatting.",
+            "Return JSON only with keys: safety, rejection_reason, improved_prompt, short_title, social_caption, visual_strategy, audience_angle, layout_strategy, image_direction, commercial_intent_classification.",
             "safety must be allowed or blocked.",
             "Block illegal, exploitative, hateful, violent, sexual or deceptive ad requests.",
             "When allowed, build a prompt that stays flexible and intelligent: it must adapt to beauty, food, real estate, events, luxury, education, street commerce, services, church communication, recruitment, maquis culture, or any other category without collapsing into one generic flyer recipe.",
@@ -739,9 +744,11 @@ export async function optimizePrompt(input: {
             "Section 3 must adapt the subject, dominant color, accent color, mood, sector context and specific visual details from the user brief.",
             "Section 4 must always include: dramatic studio lighting with golden highlights, cinematic lighting setup, strong light-shadow contrast, professional product photography lighting, soft background bokeh, depth and dimension, rim lighting to separate subject from background.",
             "Section 5 must always include: clear text overlay areas at top and bottom thirds, clean negative space reserved for typography, uncluttered zones for headline and contact information, visual hierarchy with defined focal points, poster layout with balanced composition.",
+            "IMPORTANT: If the user brief provides mandatory text (mandatory_copy_points or product name), explicitly instruct the image model: 'Leave clear, high-contrast, uncluttered areas in the layout specifically for the following text: [Copy]. Use bold, legible, modern sans-serif typography for these areas. Do not merge text into the complex visual background, place it on a distinct background layer or clear space'.",
             "Section 6 must always include: ultra detailed, 4K resolution, sharp focus throughout, perfect composition, rule of thirds, balanced layout, no distortion, no deformation, no artifacts, photorealistic render, crystal clear details.",
-             "Section 7 must always include a poster intent adapted to the requested format: poster design style, commercial billboard aesthetic, print-ready artwork, clean edges, social media ready format, plus portrait orientation only when the requested format is vertical.",
-             "If the user gives a dominant color, respect it absolutely.",
+            "Section 7 must always include a poster intent adapted to the requested format: poster design style, commercial billboard aesthetic, print-ready artwork, clean edges, social media ready format, plus portrait orientation only when the requested format is vertical.",
+            "Section 8 (TYPOGRAPHY): For all text mandated by the user, the style should be: 'Professional marketing typography, high readability, high contrast against background, bold hierarchy, modern sans-serif fonts, sharp and clear text rendering'.",
+            "If the user gives a dominant color, respect it absolutely.",
             "If mandatory_copy_points is provided, every critical item from that field must be visibly represented in the generated design intent and text hierarchy. Do not omit those items.",
             "Never invent factual information not present in user_brief, mandatory_copy_points, refinement_answers, or explicit user inputs.",
             "Do not add phone numbers, addresses, websites, social handles, prices, dates, opening hours, promo percentages, names, or legal mentions unless explicitly provided by the user.",
@@ -767,6 +774,10 @@ export async function optimizePrompt(input: {
         role: "user",
         content: JSON.stringify(buildPromptContext(input)),
       },
+      {
+        role: "user",
+        content: "Analyze the user brief and add a key 'commercial_intent_classification' to your JSON response, choosing from: launch, booking, premium_positioning, general_conversion."
+      }
     ],
   });
 
@@ -796,6 +807,7 @@ export async function generateRefinementQuestions(input: {
     model: env.OPENROUTER_REFINEMENT_MODEL,
     temperature: 0.2,
     max_tokens: 700,
+    response_format: { type: "json_object" },
     messages: [
       {
         role: "system",
@@ -944,7 +956,7 @@ export async function generateImage(input: {
     const fallbackPayload = {
       model: env.OPENROUTER_IMAGE_MODEL,
       modalities: ["image", "text"],
-      max_tokens: 500,
+      max_tokens: 4000,
       stream: false,
       messages: [{ role: "user", content: input.finalPrompt }],
       image_config: {
@@ -988,7 +1000,12 @@ export async function generateImage(input: {
   }
 
   if (typeof finalImageDataUrl !== "string") {
-    const messageText = response?.choices?.[0]?.message?.content;
+    const resObj = response as Record<string, unknown>;
+    const choices = Array.isArray(resObj?.choices) ? resObj.choices as Array<Record<string, unknown>> : undefined;
+    const messageText = choices?.[0]?.message && typeof choices[0].message === 'object' 
+      ? (choices[0].message as Record<string, unknown>)?.content 
+      : undefined;
+      
     const normalizedMessage =
       typeof messageText === "string" ? messageText.toLowerCase() : "";
     const looksTooLong =
@@ -1001,7 +1018,7 @@ export async function generateImage(input: {
       const reducedPayload = {
         model: env.OPENROUTER_IMAGE_MODEL,
         modalities: ["image", "text"],
-        max_tokens: 350,
+        max_tokens: 4000,
         stream: false,
         messages: [{ role: "user", content: reducedPrompt }],
         image_config: {
@@ -1016,7 +1033,10 @@ export async function generateImage(input: {
   }
 
   if (typeof finalImageDataUrl !== "string") {
-    const preview = JSON.stringify(response?.choices?.[0]?.message ?? {}).slice(0, 700);
+    const resObj = response as Record<string, unknown>;
+    const choices = Array.isArray(resObj?.choices) ? resObj.choices as Array<Record<string, unknown>> : undefined;
+    const message = choices?.[0]?.message;
+    const preview = JSON.stringify(message ?? {}).slice(0, 700);
     throw new Error(
       `No generated image returned by OpenRouter. Response keys: ${Object.keys(response ?? {}).join(", ")}. message preview: ${preview}`,
     );

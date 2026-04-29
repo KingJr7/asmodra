@@ -34,13 +34,17 @@ export default async function DashboardPage() {
   const quota = computeQuotaSnapshot(viewer.profile);
   const plan = getPlanDefinition(viewer.profile.plan_id);
   const onboardingComplete = isProfileOnboardingComplete(viewer.profile);
-  const { data: recentPayments } = await supabase
-    ?.from("payment_transactions")
-    .select("*")
-    .eq("user_id", viewer.user.id)
-    .order("created_at", { ascending: false })
-    .limit(8)
-    .returns<PaymentRecord[]>();
+  const recentPayments = supabase
+    ? (
+        await supabase
+          .from("payment_transactions")
+          .select("*")
+          .eq("user_id", viewer.user.id)
+          .order("created_at", { ascending: false })
+          .limit(8)
+          .returns<PaymentRecord[]>()
+      ).data
+    : null;
 
   const lastPayment = recentPayments?.[0] ?? null;
 

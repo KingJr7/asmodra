@@ -225,15 +225,24 @@
   border: 1px solid rgba(204, 195, 216, 0.16);
   border-radius: 24px;
   background: rgba(29, 26, 36, 0.85);
+  display: flex;
+  flex-direction: column;
+  height: 500px;
+  min-height: 500px;
+  max-height: 500px;
+  overflow: hidden;
 }
 
 .flyerThumb {
   width: 100%;
-  aspect-ratio: 3 / 4;
+  height: 300px;
+  min-height: 300px;
+  max-height: 300px;
   object-fit: cover;
   border-radius: 16px;
   border: 1px solid rgba(204, 195, 216, 0.18);
   margin-bottom: 0.75rem;
+  display: block;
 }
 
 .flyerZoomButton {
@@ -293,14 +302,16 @@
 .pill {
   display: inline-flex;
   align-items: center;
-  margin-top: 0.7rem;
-  padding: 0.35rem 0.6rem;
+  margin-top: auto; /* Pousse le bouton vers le bas */
+  padding: 0.5rem 1rem;
   border-radius: 999px;
   border: 1px solid rgba(123, 208, 255, 0.24);
   background: rgba(123, 208, 255, 0.14);
   color: #caeaff;
-  font-size: 0.72rem;
+  font-size: 0.85rem;
   font-weight: 700;
+  width: fit-content;
+  text-decoration: none;
 }
 
 .featured {

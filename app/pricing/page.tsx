@@ -88,7 +88,7 @@ export default async function PricingPage() {
           </div>
         </section>
 
-        {viewer?.user ? (
+        {viewer?.user && viewer.profile ? (
           <section className={styles.section}>
             <h2>Choisis une offre ou un pack puis paie en une fois</h2>
             <p className={styles.lead}>
