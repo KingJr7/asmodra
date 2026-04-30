@@ -722,14 +722,14 @@ export async function optimizePrompt(input: {
     max_tokens: 500,
     response_format: { type: "json_object" },
     messages: [
-      { role: "system", content: "Tu es un stratège marketing. Analyse le brief et définis l'intention commerciale (launch, booking, premium_positioning, general_conversion) et les points clés à mettre en avant." },
+      { role: "system", content: "Tu es un stratège marketing. Ton output DOIT être en format JSON.. Analyse le brief et définis l'intention commerciale (launch, booking, premium_positioning, general_conversion) et les points clés à mettre en avant." },
       { role: "user", content: JSON.stringify(buildPromptContext(input)) }
     ],
   });
 
   // Étape 2 : Le Directeur Artistique (Traduction en design expressif)
   const daResponse = await openRouterFetch({
-    model: "anthropic/claude-3.5-haiku",
+    model: "openai/gpt-4.1-mini",
     temperature: 0.3,
     max_tokens: 800,
     response_format: { type: "json_object" },
@@ -737,9 +737,10 @@ export async function optimizePrompt(input: {
       {
         role: "system",
         content: [
-          "Tu es un Directeur Artistique Senior pour une agence publicitaire haut de gamme.",
+          "You are a Senior Art Director for a top-tier design agency. Output MUST be valid JSON.",
           "TA MISSION : Transformer la stratégie marketing en une directive visuelle pour un modèle image.",
           "RÈGLES DE FOND : NEVER use flat colors or simple patterns. Backgrounds MUST be expressive, rich in texture, or cinematic. Use dramatic studio lighting, depth of field, or complex organic textures.",
+          "LANGUE : Tout texte affiché sur l'affiche DOIT être exclusivement en français (ou dans la langue du brief original).",
           "COMPOSITION : 30-40-30 rule. Clear visual hierarchy (Product > Headline > CTA).",
           "TEXTE : Do not transcribe lists. Integrate text as graphic design elements (hollow typography, stylized containers).",
           "Return JSON only with keys: improved_prompt, short_title, visual_strategy, commercial_intent_classification."
@@ -775,7 +776,7 @@ export async function generateRefinementQuestions(input: {
 }) {
   const env = requireOpenRouterEnv();
   const response = await openRouterFetch({
-    model: "anthropic/claude-3.5-haiku",
+    model: "openai/gpt-4.1-mini",
     temperature: 0.2,
     max_tokens: 1000,
     response_format: { type: "json_object" },
@@ -788,7 +789,7 @@ export async function generateRefinementQuestions(input: {
             "1. ANALYSIS: First, think about the business purpose (Launch, Booking, Branding, etc.) and identify key information typically required for high-impact posters that is missing in the user brief.",
             "2. FILTERING: Only ask for information that is NOT present in the brief and is critical for the visual composition (e.g., if phone is missing, ask for it; if it is there, do not ask).",
             "3. CONSTRAINTS: Ask a maximum of 4 questions.",
-            "4. OUTPUT: Return JSON only with one key: 'questions' (array of objects: id, prompt, type, placeholder, options).",
+            "4. OUTPUT: Return JSON only with one key: 'questions' (array of objects: id, prompt, type, placeholder, options). Ensure the output is formatted as valid JSON.",
             "5. TYPE: 'text' or 'single_choice'.",
             "Keep prompts concise and in French.",
           ].join(" "),
@@ -1011,7 +1012,7 @@ export async function generateImage(input: {
   return {
     imageDataUrl: finalImageDataUrl,
     raw: response,
-    usage: (response as any)?.usage,
+    usage: response && typeof response === 'object' && 'usage' in response ? (response as Record<string, unknown>).usage as Record<string, unknown> : undefined,
   };
 }
 
