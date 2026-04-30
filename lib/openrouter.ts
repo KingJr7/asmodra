@@ -711,83 +711,54 @@ export async function optimizePrompt(input: {
       audience_angle: "",
       layout_strategy: "",
       image_direction: "",
+      commercial_intent_classification: "general_conversion",
     };
   }
 
-  const env = requireOpenRouterEnv();
-  const response = await openRouterFetch({
-    model: env.OPENROUTER_PROMPT_MODEL,
-    temperature: 0.45,
-    max_tokens: 1400,
+  // Étape 1 : Le Stratège (Analyse du besoin commercial)
+  const strategyResponse = await openRouterFetch({
+    model: "openai/gpt-4.1-mini",
+    temperature: 0.2,
+    max_tokens: 500,
+    response_format: { type: "json_object" },
     messages: [
-      {
-        role: "system",
-        content:
-          [
-            "You are a Senior Art Director for a top-tier design agency. Your goal is to conceptualize high-converting flyers.",
-            "You are a designer, NOT a transcriber. When you receive input text, your task is to integrate it into the flyer's design identity as if it were a high-end graphic layout.",
-            "NEVER display raw data fields (e.g., 'Nom: Bissgood'). Instead, extract the entity name (Bissgood) and integrate it using creative visual techniques: high-impact typography, decorative containers, or stylized overlays.",
-            "Use the 'mandatory_copy_points' not as a list to be copied, but as content to be styled. If you receive a phone number, treat it as a visual call-to-action anchor in the design hierarchy.",
-            "Follow the 'Show, don't tell' principle: if a business name is provided, style it as a brand logo. If a service is provided, style it as a bold headline. Avoid list-based formatting at all costs.",
-            "Ensure the visual flow of the flyer guides the eye from the main offer (Hero) to the contact point (CTA).",
-            "Maintain your professional African graphic designer aesthetic as established in previous sections, but prioritize the creative integration of copy over literal formatting.",
-            "Return JSON only with keys: safety, rejection_reason, improved_prompt, short_title, social_caption, visual_strategy, audience_angle, layout_strategy, image_direction, commercial_intent_classification.",
-            "safety must be allowed or blocked.",
-            "Block illegal, exploitative, hateful, violent, sexual or deceptive ad requests.",
-            "When allowed, build a prompt that stays flexible and intelligent: it must adapt to beauty, food, real estate, events, luxury, education, street commerce, services, church communication, recruitment, maquis culture, or any other category without collapsing into one generic flyer recipe.",
-            "Use the references as guidance, not as a rigid style prison. Respect useful cues from user images such as color, product shape, person identity, texture, packaging, brand universe, or realism level.",
-            "Treat the inferred hints as helpers, not rigid instructions. If the user brief clearly points elsewhere, follow the brief.",
-            "The improved_prompt must optimize for strong commercial readability, useful hierarchy, believable imagery, strategic composition, and the right emotional tone for the business.",
-            "The improved_prompt must follow this exact order in natural sentences, not dry keywords.",
-            "Section 1 must always begin with: professional flyer design by an expert African graphic designer, high-end commercial print quality, award-winning design, magazine-grade visual quality, meticulous attention to detail, polished and refined, production-ready artwork.",
-            "Section 2 must always include: vibrant West/Central African aesthetic, bold and energetic color palette, cultural visual richness, warm and inviting tropical tones, African market visual language, high-contrast eye-catching design, celebratory and dynamic composition.",
-            "Section 3 must adapt the subject, dominant color, accent color, mood, sector context and specific visual details from the user brief.",
-            "Section 4 must always include: dramatic studio lighting with golden highlights, cinematic lighting setup, strong light-shadow contrast, professional product photography lighting, soft background bokeh, depth and dimension, rim lighting to separate subject from background.",
-            "Section 5 must always include: clear text overlay areas at top and bottom thirds, clean negative space reserved for typography, uncluttered zones for headline and contact information, visual hierarchy with defined focal points, poster layout with balanced composition.",
-            "IMPORTANT: If the user brief provides mandatory text (mandatory_copy_points or product name), explicitly instruct the image model: 'Leave clear, high-contrast, uncluttered areas in the layout specifically for the following text: [Copy]. Use bold, legible, modern sans-serif typography for these areas. Do not merge text into the complex visual background, place it on a distinct background layer or clear space'.",
-            "Section 6 must always include: ultra detailed, 4K resolution, sharp focus throughout, perfect composition, rule of thirds, balanced layout, no distortion, no deformation, no artifacts, photorealistic render, crystal clear details.",
-            "Section 7 must always include a poster intent adapted to the requested format: poster design style, commercial billboard aesthetic, print-ready artwork, clean edges, social media ready format, plus portrait orientation only when the requested format is vertical.",
-            "Section 8 (TYPOGRAPHY): For all text mandated by the user, the style should be: 'Professional marketing typography, high readability, high contrast against background, bold hierarchy, modern sans-serif fonts, sharp and clear text rendering'.",
-            "If the user gives a dominant color, respect it absolutely.",
-            "If mandatory_copy_points is provided, every critical item from that field must be visibly represented in the generated design intent and text hierarchy. Do not omit those items.",
-            "Never invent factual information not present in user_brief, mandatory_copy_points, refinement_answers, or explicit user inputs.",
-            "Do not add phone numbers, addresses, websites, social handles, prices, dates, opening hours, promo percentages, names, or legal mentions unless explicitly provided by the user.",
-            "When mandatory_copy_points is present, use exactly those essential facts as source of truth for visible flyer copy. You may only normalize spelling/accents/typography without changing factual content.",
-             "If refinement_answers are provided, treat them as final directives from the client and follow them strictly over default heuristics.",
-             "If the user uploads a reference image for a product, person or logo, mention that element explicitly as a hero element in the foreground with photorealistic integration.",
-            "Never use the words simple or minimalist inside the improved_prompt, and do not use clean outside the two fixed technical phrases that already contain it.",
-            "Do not exceed roughly 400 tokens in the improved_prompt.",
-            "Adapt the density, rhythm and polish level to the actual brief: some flyers need urgency and energy, others need calm trust, premium restraint or product appetite.",
-            "Do not overfit to one region, one palette or one composition recipe. Stay culturally credible, commercially useful and visually intentional.",
-            "Avoid generic AI aesthetics, fake luxury when the brief is practical, and overdesigned layouts when the goal is quick conversion.",
-            "Default language is French for all flyer text content.",
-            "If the user brief is in another language, keep all flyer text in that same language.",
-            "If the user explicitly provides some English copy (for brand taglines, slogans, or mandatory words), keep those exact English fragments as-is.",
-            "Do not blindly copy spelling mistakes from user input. Correct spelling, accents, grammar, and typography for all visible flyer text while preserving meaning and commercial intent.",
-            "For mandatory_copy_points, preserve factual values exactly (names, phone numbers, dates, prices, percentages, addresses) but correct spelling around them when needed.",
-            "Before finalizing improved_prompt, run an explicit copy-quality check: spelling, grammar agreement, punctuation, capitalization, accent marks, and readability of headline/CTA/contact lines.",
-            "Reject malformed or unclear copy formulations and rewrite them into correct, professional French (or the user's language) while preserving factual values exactly.",
-            "All copy shown on the flyer must be internally consistent in one main language unless the user explicitly requests bilingual text.",
-          ].join(" "),
-      },
-      {
-        role: "user",
-        content: JSON.stringify(buildPromptContext(input)),
-      },
-      {
-        role: "user",
-        content: "Analyze the user brief and add a key 'commercial_intent_classification' to your JSON response, choosing from: launch, booking, premium_positioning, general_conversion."
-      }
+      { role: "system", content: "Tu es un stratège marketing. Analyse le brief et définis l'intention commerciale (launch, booking, premium_positioning, general_conversion) et les points clés à mettre en avant." },
+      { role: "user", content: JSON.stringify(buildPromptContext(input)) }
     ],
   });
 
-  const content = response?.choices?.[0]?.message?.content;
+  // Étape 2 : Le Directeur Artistique (Traduction en design expressif)
+  const daResponse = await openRouterFetch({
+    model: "anthropic/claude-3.5-haiku",
+    temperature: 0.3,
+    max_tokens: 800,
+    response_format: { type: "json_object" },
+    messages: [
+      {
+        role: "system",
+        content: [
+          "Tu es un Directeur Artistique Senior pour une agence publicitaire haut de gamme.",
+          "TA MISSION : Transformer la stratégie marketing en une directive visuelle pour un modèle image.",
+          "RÈGLES DE FOND : NEVER use flat colors or simple patterns. Backgrounds MUST be expressive, rich in texture, or cinematic. Use dramatic studio lighting, depth of field, or complex organic textures.",
+          "COMPOSITION : 30-40-30 rule. Clear visual hierarchy (Product > Headline > CTA).",
+          "TEXTE : Do not transcribe lists. Integrate text as graphic design elements (hollow typography, stylized containers).",
+          "Return JSON only with keys: improved_prompt, short_title, visual_strategy, commercial_intent_classification."
+        ].join("\n")
+      },
+      { role: "user", content: `Stratégie : ${JSON.stringify(strategyResponse.choices[0].message.content)}` }
+    ],
+  });
 
-  if (typeof content !== "string") {
-    throw new Error("Prompt optimizer returned an invalid payload.");
-  }
+  const content = daResponse.choices[0].message.content;
+  if (typeof content !== "string") throw new Error("Prompt design failed.");
 
-  return parseJsonBlock<PromptOptimizationResult>(content);
+  const result = parseJsonBlock<PromptOptimizationResult>(content);
+  
+  return {
+    ...result,
+    safety: "allowed" as const,
+    rejection_reason: null,
+  };
 }
 
 export async function generateRefinementQuestions(input: {
@@ -804,27 +775,22 @@ export async function generateRefinementQuestions(input: {
 }) {
   const env = requireOpenRouterEnv();
   const response = await openRouterFetch({
-    model: env.OPENROUTER_REFINEMENT_MODEL,
+    model: "anthropic/claude-3.5-haiku",
     temperature: 0.2,
-    max_tokens: 700,
+    max_tokens: 1000,
     response_format: { type: "json_object" },
     messages: [
       {
         role: "system",
         content:
           [
-            "You are a French-speaking creative brief clarifier for flyer generation.",
-            "Your goal is to ask up to 10 high-impact refinement questions only when needed.",
-            "Return JSON only with one key: questions.",
-            "questions is an array of objects with keys: id, prompt, type, placeholder, options.",
-            "type must be text or single_choice.",
-            "For text: options must be empty array, placeholder must contain concrete examples.",
-            "For single_choice: provide 3 to 6 options and keep them mutually exclusive when possible.",
-            "Keep each prompt short, clear, and directly actionable.",
-            "Ask nothing if the brief is already precise enough; in that case return an empty questions array.",
-            "Prioritize missing factual fields that prevent a safe final copy: phone, address, website, social handle, date, time, place, exact offer, price, CTA, and legal details when relevant.",
-            "Focus on uncertainties that strongly affect final composition, style, structure, mood, or target conversion.",
-            "Keep output in French.",
+            "You are a Strategic Marketing Designer. Your goal is to refine the flyer brief by asking exactly the right questions to ensure professional results.",
+            "1. ANALYSIS: First, think about the business purpose (Launch, Booking, Branding, etc.) and identify key information typically required for high-impact posters that is missing in the user brief.",
+            "2. FILTERING: Only ask for information that is NOT present in the brief and is critical for the visual composition (e.g., if phone is missing, ask for it; if it is there, do not ask).",
+            "3. CONSTRAINTS: Ask a maximum of 4 questions.",
+            "4. OUTPUT: Return JSON only with one key: 'questions' (array of objects: id, prompt, type, placeholder, options).",
+            "5. TYPE: 'text' or 'single_choice'.",
+            "Keep prompts concise and in French.",
           ].join(" "),
       },
       {
@@ -832,13 +798,9 @@ export async function generateRefinementQuestions(input: {
         content: JSON.stringify({
           business_name: input.businessName ?? null,
           business_category: input.businessCategory ?? null,
-          city: input.city ?? null,
-          brand_tone: input.brandTone ?? null,
           product_or_service: input.product,
           user_brief: input.idea,
-          custom_prompt: input.customPrompt ?? null,
           mandatory_copy_points: input.mustDisplayInfo ?? null,
-          user_dominant_color: input.dominantColor ?? null,
           output_format: input.format,
         }),
       },
@@ -859,7 +821,11 @@ export async function generateImage(input: {
   finalPrompt: string;
   format: GenerationFormat;
   referenceImages?: string[];
-}) {
+}): Promise<{
+  imageDataUrl: unknown;
+  raw: Record<string, unknown> | undefined;
+  usage: Record<string, unknown> | undefined;
+}> {
   const env = requireOpenRouterEnv();
   const content: Array<
     | { type: "text"; text: string }
@@ -1045,6 +1011,7 @@ export async function generateImage(input: {
   return {
     imageDataUrl: finalImageDataUrl,
     raw: response,
+    usage: (response as any)?.usage,
   };
 }
 

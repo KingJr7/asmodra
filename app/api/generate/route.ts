@@ -370,7 +370,11 @@ export async function POST(request: Request) {
       );
     }
 
-    const generated =
+    const generated: {
+      imageDataUrl: unknown;
+      raw: unknown;
+      usage?: Record<string, unknown> | undefined;
+    } =
       provider === "puter"
         ? await generateImageWithPuter({
             finalPrompt: optimized.improved_prompt,
@@ -390,8 +394,8 @@ export async function POST(request: Request) {
             });
 
     const finalImage = plan.watermark
-      ? await applyWatermark(generated.imageDataUrl)
-      : generated.imageDataUrl;
+      ? await applyWatermark(generated.imageDataUrl as string)
+      : (generated.imageDataUrl as string);
 
     const rawOutputBuffer = await imageDataUrlOrHttpToBuffer(finalImage);
     const outputBuffer = await sharp(rawOutputBuffer)
@@ -472,6 +476,7 @@ export async function POST(request: Request) {
         p_metadata: {
           title: optimized.short_title,
           caption: optimized.social_caption,
+          usage: generated.usage,
           reference_count: referenceDataUrls.length,
           examples_count: examples.length,
           upload_bytes: totalUploadBytes,

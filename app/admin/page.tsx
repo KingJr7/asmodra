@@ -3,6 +3,7 @@ import Link from "next/link";
 import { requireAdmin } from "@/lib/auth";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { AdminUserTable } from "@/components/admin-user-table";
+import { AdminGenerationsTable } from "@/components/admin-generations-table";
 import { AdminReconcileButton } from "@/components/admin-reconcile-button";
 import type { PaymentRecord, ProfileRecord, SubscriptionRecord } from "@/lib/types";
 
@@ -90,6 +91,11 @@ export default async function AdminPage() {
               business_name: user.business_name,
             }))}
           />
+        </section>
+
+        <section className={styles.section}>
+          <h2>Dernières générations et coûts (Tokens)</h2>
+          <AdminGenerationsTable />
         </section>
 
         <section className={styles.section}>
