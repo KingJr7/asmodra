@@ -48,8 +48,10 @@ export function GenerateForm({ quotaRemaining, watermarkEnabled }: GenerateFormP
   const [refinementAnswers, setRefinementAnswers] = useState<string[]>([]);
   const [questionIndex, setQuestionIndex] = useState(0);
   const [pendingFormData, setPendingFormData] = useState<FormData | null>(null);
-  const [previewOpen, setPreviewOpen] = useState(false);
+  const [promptOnlyMode, setPromptOnlyMode] = useState(false);
+  const [debugPrompt, setDebugPrompt] = useState("");
   const [revisionNote, setRevisionNote] = useState("");
+  const [previewOpen, setPreviewOpen] = useState(false);
   const [lastRequest, setLastRequest] = useState<null | {
     product: string;
     format: string;
@@ -97,6 +99,10 @@ export function GenerateForm({ quotaRemaining, watermarkEnabled }: GenerateFormP
       formData.set("refinement_answers", JSON.stringify(questionAnswers));
     }
 
+    if (promptOnlyMode) {
+      formData.set("prompt_only", "true");
+    }
+
     try {
       const response = await fetch("/api/generate", {
         method: "POST",
@@ -104,9 +110,16 @@ export function GenerateForm({ quotaRemaining, watermarkEnabled }: GenerateFormP
       });
 
       const payload = await response.json();
+      setLoading(false);
+      
       if (!response.ok) {
-        setLoading(false);
         setError(normalizeError(payload.error ?? "Erreur de génération."));
+        return;
+      }
+
+      if (promptOnlyMode) {
+        setDebugPrompt(payload.improvedPrompt || "");
+        setPromptOnlyMode(false);
         return;
       }
 
@@ -303,10 +316,57 @@ export function GenerateForm({ quotaRemaining, watermarkEnabled }: GenerateFormP
         </div>
 
         <div className={styles.actions}>
-          <button type="submit" className={styles.button} disabled={loading || questionLoading}>
+          <button 
+            type="submit" 
+            className={styles.button} 
+            disabled={loading || questionLoading}
+            onClick={() => setPromptOnlyMode(false)}
+          >
             Lancer le Studio créatif
           </button>
+          <button 
+            type="submit" 
+            className={styles.secondaryButton} 
+            disabled={loading || questionLoading}
+            onClick={() => {
+              setPromptOnlyMode(true);
+              setDebugPrompt("");
+            }}
+          >
+            Concevoir le prompt
+          </button>
         </div>
+
+        {debugPrompt && (
+          <Reveal className={styles.formModule} style={{ border: '1px solid var(--accent)', background: 'rgba(210, 187, 255, 0.05)' }}>
+            <div className={styles.moduleHeader}>
+              <div className={styles.moduleIcon}>📜</div>
+              <span className={styles.moduleTitle}>Prompt Technique (Debug)</span>
+            </div>
+            <pre style={{ 
+              whiteSpace: 'pre-wrap', 
+              fontSize: '0.85rem', 
+              color: '#d1cedb', 
+              background: '#000', 
+              padding: '1rem', 
+              borderRadius: '12px',
+              fontFamily: 'monospace' 
+            }}>
+              {debugPrompt}
+            </pre>
+            <button 
+              type="button" 
+              className={styles.secondaryButton} 
+              style={{ marginTop: '1rem', width: 'fit-content' }}
+              onClick={() => {
+                navigator.clipboard.writeText(debugPrompt);
+                alert("Prompt copié !");
+              }}
+            >
+              Copier le prompt
+            </button>
+          </Reveal>
+        )}
 
         <p className={styles.hint}>
           Crédits disponibles: <strong>{quotaRemaining}</strong> • Signature Asmodra: <strong>{watermarkEnabled ? "Oui" : "Non"}</strong>
@@ -374,6 +434,24 @@ export function GenerateForm({ quotaRemaining, watermarkEnabled }: GenerateFormP
             </div>
           </div>
         </Reveal>
+      )}
+
+      {result && previewOpen && (
+        <div className={styles.modalBackdrop} onClick={() => setPreviewOpen(false)}>
+          <div className={styles.modalCard} onClick={(event) => event.stopPropagation()}>
+            <Image
+              src={result.imageDataUrl}
+              alt={result.title}
+              className={styles.imagePreview}
+              width={1200}
+              height={1600}
+              unoptimized
+            />
+            <button type="button" className={styles.secondaryButton} onClick={() => setPreviewOpen(false)}>
+              Fermer
+            </button>
+          </div>
+        </div>
       )}
 
       {/* Loading Overlay */}

@@ -234,6 +234,7 @@ export async function POST(request: Request) {
     const format = sanitizeText(formData.get("format")) as GenerationFormat;
     const refinementAnswersRaw = sanitizeMultiline(formData.get("refinement_answers"));
     const refinementAnswers = parseRefinementAnswers(refinementAnswersRaw);
+    const promptOnly = formData.get("prompt_only") === "true";
 
     if (!product || !idea || !allowedFormats.includes(format)) {
       return NextResponse.json(
@@ -358,6 +359,19 @@ export async function POST(request: Request) {
           referenceImagesCount: references.length,
           exampleImagesCount: examples.length,
         }));
+
+    if (promptOnly) {
+      if (reservationId) {
+        await admin.rpc("cancel_generation_reservation", {
+          p_reservation_id: reservationId,
+          p_reason: "PROMPT_ONLY_PREVIEW",
+        });
+      }
+      return NextResponse.json({
+        improvedPrompt: optimized.improved_prompt,
+        statusLabel: "Prompt conçu avec succès (aperçu uniquement).",
+      });
+    }
 
     if (optimized.safety === "blocked") {
       const { error: cancelError } = await admin.rpc("cancel_generation_reservation", {

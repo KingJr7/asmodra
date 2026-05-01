@@ -109,13 +109,20 @@ export async function POST(request: Request) {
     }
 
     const provider = getAiProvider();
+    const userInputs = `${product} ${idea} ${mustDisplayInfo} ${customPrompt}`.toLowerCase();
+
+    const businessName = (profile.business_name && userInputs.includes(profile.business_name.toLowerCase())) ? profile.business_name : null;
+    const businessCategory = (profile.business_category && userInputs.includes(profile.business_category.toLowerCase())) ? profile.business_category : null;
+    const city = (profile.city && userInputs.includes(profile.city.toLowerCase())) ? profile.city : null;
+    const brandTone = (profile.brand_tone && userInputs.includes(profile.brand_tone.toLowerCase())) ? profile.brand_tone : null;
+
     const result =
       provider === "puter"
         ? await generateRefinementQuestionsWithPuter({
-            businessName: profile.business_name,
-            businessCategory: profile.business_category,
-            city: profile.city,
-            brandTone: profile.brand_tone,
+            businessName,
+            businessCategory,
+            city,
+            brandTone,
             product,
             idea,
             customPrompt,
@@ -125,10 +132,10 @@ export async function POST(request: Request) {
           })
         : provider === "pollinations"
           ? await generateRefinementQuestionsWithPollinations({
-              businessName: profile.business_name,
-              businessCategory: profile.business_category,
-              city: profile.city,
-              brandTone: profile.brand_tone,
+              businessName,
+              businessCategory,
+              city,
+              brandTone,
               product,
               idea,
               customPrompt,
@@ -137,10 +144,10 @@ export async function POST(request: Request) {
               format,
             })
         : await generateRefinementQuestions({
-            businessName: profile.business_name,
-            businessCategory: profile.business_category,
-            city: profile.city,
-            brandTone: profile.brand_tone,
+            businessName,
+            businessCategory,
+            city,
+            brandTone,
             product,
             idea,
             customPrompt,

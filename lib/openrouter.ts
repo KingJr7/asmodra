@@ -20,18 +20,6 @@ type OpenRouterMessage =
       >;
     };
 
-function getAspectRatio(format: GenerationFormat) {
-  if (format === "story") {
-    return "9:16";
-  }
-
-  if (format === "print") {
-    return "3:4";
-  }
-
-  return "1:1";
-}
-
 async function openRouterFetch(body: Record<string, unknown>) {
   const env = requireOpenRouterEnv();
   const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
@@ -673,6 +661,192 @@ function buildPromptContext(input: {
   };
 }
 
+// ─────────────────────────────────────────────────────────────────────────────
+// BIBLE COMPLÈTE DU DIRECTEUR ARTISTIQUE
+// Intégrée comme constante pour garder optimizePrompt lisible
+// ─────────────────────────────────────────────────────────────────────────────
+const DA_SYSTEM_PROMPT = `
+You are a senior African commercial art director specialized in premium French-language flyers for Central and West African markets.
+
+Your job is to transform a brief into a single high-performance image-generation prompt for a flyer that looks expensive, modern, readable, and commercially persuasive.
+
+IMPORTANT:
+- Output must be valid JSON only.
+- Write the execution prompt in English for image models.
+- Any text that must appear on the flyer itself must be written in French exactly as requested by the brief.
+- Never invent brand names, dates, phone numbers, addresses, prices, or offers.
+- Prefer strong composition, clear hierarchy, and premium photorealistic compositing over decorative clutter.
+
+────────────────────────────────────────────────────────
+DESIGN GOAL
+────────────────────────────────────────────────────────
+Create a flyer that feels like a real high-end advertising poster:
+- strong visual impact within 2 seconds
+- premium commercial look
+- African francophone market context
+- photorealistic hero element
+- bold typography
+- clean but rich composition
+- readable at mobile size
+- print-friendly and social-media-friendly
+
+────────────────────────────────────────────────────────
+VISUAL SYSTEM
+────────────────────────────────────────────────────────
+Every flyer must be built around these 4 layers, from back to front:
+1. Background atmosphere
+2. Decorative energy elements
+3. Hero subject
+4. Typography and CTA blocks
+
+The composition must feel intentional and balanced, not random.
+
+────────────────────────────────────────────────────────
+CORE LAYOUT RULE
+────────────────────────────────────────────────────────
+Use a 3-part structure:
+
+HEADER:
+- brand name or main title
+- short supporting line
+- placed top-left, top-center, or top-right depending on composition
+- should be immediately readable
+
+BODY:
+- the main hero element dominates the center or right side
+- product, person, school, event symbol, or app mockup must be the visual anchor
+- add depth, rim light, reflections, shadows, and realistic compositing
+- include contextual props only if they support the message
+
+FOOTER:
+- price, date, phone, website, address, CTA
+- must be clearly separated from the body
+- use badges, pills, circles, ribbons, or banners for key commercial info
+- never leave important details as tiny plain text
+
+────────────────────────────────────────────────────────
+TYPOGRAPHY RULES
+────────────────────────────────────────────────────────
+- Main headline must be huge and dominant
+- Secondary line must be smaller, elegant, and concise
+- Price or offer must always be inside a badge or container
+- Contact information must be clear and scannable
+- Use bold condensed display typography for the headline
+- Use elegant script only for a short accent phrase
+- Use high contrast and shadows for legibility
+- Do not use font names
+- Do not let text float unprotected on busy backgrounds
+
+────────────────────────────────────────────────────────
+STYLE DIRECTIONS
+────────────────────────────────────────────────────────
+Choose the style based on the brief:
+
+FOOD / DRINK:
+- appetizing, fresh, rich texture, condensation, splash, fruit slices, leaves, liquid motion
+
+PRODUCT:
+- premium product hero, reflections, studio lighting, clean background, glowing edges, luxury feel
+
+EDUCATION / SCHOOL:
+- trustworthy, modern, structured, inspiring, strong institutional identity, motivated young people, clean icons
+
+EVENT:
+- energetic, festive, dramatic lighting, bold contrast, strong date/venue visibility, dynamic shapes
+
+SERVICE / BRAND:
+- professional, confident, polished, conversion-focused, clean hierarchy, strong CTA
+
+────────────────────────────────────────────────────────
+COLOR RULES
+────────────────────────────────────────────────────────
+- Use a maximum of 2 dominant colors and 1 accent color
+- If the user specifies a dominant color, keep it as the main visual anchor
+- Use accent color for CTA, price, badge, or key emphasis
+- Avoid flat background fills
+- Prefer gradients, textured surfaces, soft bokeh, or atmospheric scenes
+- Keep colors rich, deep, and premium
+- Avoid chaotic multicolor unless the brief clearly asks for a festive look
+
+────────────────────────────────────────────────────────
+DECORATIVE RULES
+────────────────────────────────────────────────────────
+Use decorative elements only if they strengthen the commercial message:
+- splashes
+- flowers
+- leaves
+- particles
+- sparks
+- floating shapes
+- glow rings
+- subtle geometric accents
+- contextual props
+
+Decorations must:
+- support the hero
+- add depth
+- guide the eye
+- never overwhelm the text
+
+────────────────────────────────────────────────────────
+REFERENCE IMAGE RULES
+────────────────────────────────────────────────────────
+If reference images are provided:
+- study the composition, color palette, hierarchy, and mood
+- preserve the useful visual DNA
+- do not copy mechanically
+- adapt the style to the new brief
+- keep the flyer's commercial logic stronger than the reference layout
+
+────────────────────────────────────────────────────────
+QUALITY REQUIREMENTS
+────────────────────────────────────────────────────────
+The flyer must look:
+- ultra-professional
+- commercial-grade
+- photorealistic
+- cinematic
+- premium
+- sharp
+- clean
+- high-end
+- print-ready
+- visually dense but controlled
+- designed for African francophone markets
+
+────────────────────────────────────────────────────────
+NEGATIVE CONSTRAINTS
+────────────────────────────────────────────────────────
+Avoid:
+- blurry text
+- low contrast
+- generic stock-photo look
+- flat composition
+- messy layout
+- too many colors
+- unreadable typography
+- weak hierarchy
+- cheap clipart feel
+- empty background
+- Western corporate style that ignores local context
+- random decorative clutter
+- unprotected floating text
+- price without badge
+- distorted product shapes
+- fake-looking faces
+- overdone cartoon style unless requested
+
+────────────────────────────────────────────────────────
+OUTPUT FORMAT
+────────────────────────────────────────────────────────
+Return JSON only with these keys:
+{
+  "improved_prompt": "English execution prompt for image generation, including the exact flyer text in French where needed",
+  "short_title": "Short French title for this flyer, max 6 words",
+  "visual_strategy": "One French sentence explaining the chosen visual direction",
+  "commercial_intent_classification": "launch | promotion | booking | premium_positioning | general_conversion"
+}
+`;
 export async function optimizePrompt(input: {
   businessName?: string | null;
   businessCategory?: string | null;
@@ -717,74 +891,35 @@ export async function optimizePrompt(input: {
 
   // Étape 1 : Le Stratège (Analyse du besoin commercial)
   const strategyResponse = await openRouterFetch({
-    model: "openai/gpt-4.1-mini",
+    model: "deepseek/deepseek-chat",
     temperature: 0.2,
     max_tokens: 500,
     response_format: { type: "json_object" },
     messages: [
-      { role: "system", content: "Tu es un stratège marketing. Ton output DOIT être en format JSON.. Analyse le brief et définis l'intention commerciale (launch, booking, premium_positioning, general_conversion) et les points clés à mettre en avant." },
-      { role: "user", content: JSON.stringify(buildPromptContext(input)) }
+      {
+        role: "system",
+        content:
+          "Tu es un stratège marketing. Ton output DOIT être en format JSON. Analyse le brief et définis l'intention commerciale (launch, booking, premium_positioning, general_conversion) et les points clés à mettre en avant.",
+      },
+      { role: "user", content: JSON.stringify(buildPromptContext(input)) },
     ],
   });
 
-  // Étape 2 : Le Directeur Artistique (Directives strictes basées sur la BIBLE DES FLYERS ULTRA PRO)
+  // Étape 2 : Le Directeur Artistique (Bible des Flyers Pro intégrée)
   const daResponse = await openRouterFetch({
-    model: "openai/gpt-4.1-mini",
-    temperature: 0.3,
-    max_tokens: 1500,
+    model: "deepseek/deepseek-chat",
+    temperature: 0.2,
+    max_tokens: 2000,
     response_format: { type: "json_object" },
     messages: [
       {
         role: "system",
-        content: `Tu es un Directeur Artistique Senior spécialisé dans le marché africain francophone. Ton output DOIT être en format JSON.
-        
-        Tu dois appliquer scrupuleusement la BIBLE DES FLYERS ULTRA PRO :
-        
-        1. ANATOMIE (3 ZONES):
-           - ZONE A (TÊTE, 20%): Logo/Marque, Accroche courte.
-           - ZONE B (CORPS, 60%): CENTRE DE GRAVITÉ. Élément héros (titre géant, produit cutout).
-           - ZONE C (PIED, 20%): Bande pleine largeur, Contact, Date, Lieu. Contraste fort.
-        
-        2. HIÉRARCHIE TYPOGRAPHIQUE (4 NIVEAUX):
-           - NIVEAU 1 (TITRE IMPACT): 40-60% de la hauteur. Ultra-bold, 3D ou extrusion. Premier élément lu.
-           - NIVEAU 2 (ACCROCHE): Script ou semi-bold, max 7 mots.
-           - NIVEAU 3 (INFOS CLÉS): Prix, date. TOUJOURS dans des conteneurs (badges, tickets, bulles).
-           - NIVEAU 4 (CONTACTS): Petit, lisible, dans le pied.
-           Ratio de taille 1.4x minimum entre chaque niveau.
-        
-        3. PALETTE ET COULEURS:
-           - Règle 2+1: Max 2 couleurs dominantes + 1 couleur d'accent (Or, Jaune, Rouge vif pour prix/CTA).
-           - FOND JAMAIS PLAT: Toujours dégradé, texture grain, photo floutée ou diagonal split. Profondeur obligatoire.
-           - PROTECTION TEXTE: Toujours ombre portée, halo ou fond contrasté sous le texte.
-        
-        4. DÉCORATION ET RUPTURE DU "PLAT":
-           - Utilise des 'Paint splashes', poudres Holi, confettis radialement.
-           - Géométrie flottante (triangles, cercles) à angles variés.
-           - Éléments 'Cutout' avec ombres douces (Bleeding autorisé).
-           - Bande de pied (Skyline, palmiers) pour ancrer le visuel.
-        
-        5. ARCHITECTURE PAR TYPE:
-           - ÉVÉNEMENT: Nom MEGA, Date/Heure, Lieu, Prix VIP/Standard (badges dentelés).
-           - PRODUIT/SERVICE: Nom+Logo, Tagline, Héros cutout, Prix FCFA.
-           - APP: Logo, Promesse MEGA, Mockups UI flottants, icônes trust (bouclier).
-        
-        6. RÈGLES INTERDITES (ANTI-PATTERNS):
-           - INTERDIT: Fond uni plat.
-           - INTERDIT: Texte sans protection (ombre/halo).
-           - INTERDIT: Prix flottants sans badge/conteneur.
-           - INTERDIT: Hiérarchie plate (tout en gras).
-           - INTERDIT: Transcrire les libellés littéralement (ex: pas de 'Nom:', 'Tel:').
-           - INTERDIT: Visages non-africains, contextes occidentaux.
-        
-        TON OUTPUT (JSON):
-        - improved_prompt: Prompt technique détaillé suivant ce template: [CORE CONCEPT] -> [COMPOSITION & DEPTH] (3 zones) -> [TYPOGRAPHY ARCHITECTURE] (4 niveaux) -> [LIGHTING & COLOR PALETTE] -> [DECORATIVE DETAILS] -> [TECHNICAL SPECS].
-        - short_title: Titre court.
-        - visual_strategy: Résumé de la hiérarchie visuelle appliquée.
-        - commercial_intent_classification: launch, booking, premium_positioning, general_conversion.
-        
-        IMPORTANT: Langue française obligatoire pour tout texte sur l'affiche.`
+        content: DA_SYSTEM_PROMPT,
       },
-      { role: "user", content: `Stratégie Marketing : ${JSON.stringify(strategyResponse.choices[0].message.content)}\nBrief Utilisateur : ${JSON.stringify(buildPromptContext(input))}` }
+      {
+        role: "user",
+        content: `Stratégie Marketing : ${JSON.stringify(strategyResponse.choices[0].message.content)}\nBrief Utilisateur : ${JSON.stringify(buildPromptContext(input))}`,
+      },
     ],
   });
 
@@ -792,7 +927,7 @@ export async function optimizePrompt(input: {
   if (typeof content !== "string") throw new Error("Prompt design failed.");
 
   const result = parseJsonBlock<PromptOptimizationResult>(content);
-  
+
   return {
     ...result,
     safety: "allowed" as const,
@@ -813,7 +948,7 @@ export async function generateRefinementQuestions(input: {
   format: GenerationFormat;
 }) {
   const response = await openRouterFetch({
-    model: "openai/gpt-4.1-mini",
+    model: "deepseek/deepseek-chat",
     temperature: 0.2,
     max_tokens: 1000,
     response_format: { type: "json_object" },
@@ -855,6 +990,18 @@ export async function generateRefinementQuestions(input: {
   return sanitizeRefinementQuestions(raw);
 }
 
+function getDimensions(format: GenerationFormat): { width: number; height: number } {
+  // Base 1024x1024 = 1,048,576 pixels (~1MP)
+  switch (format) {
+    case "story":
+      return { width: 768, height: 1344 }; // ~1.03 MP, ratio 9:16
+    case "print":
+      return { width: 896, height: 1152 }; // ~1.03 MP, ratio 3:4
+    default:
+      return { width: 1024, height: 1024 }; // 1 MP, ratio 1:1
+  }
+}
+
 export async function generateImage(input: {
   finalPrompt: string;
   format: GenerationFormat;
@@ -865,6 +1012,7 @@ export async function generateImage(input: {
   usage: Record<string, unknown> | undefined;
 }> {
   const env = requireOpenRouterEnv();
+  const dimensions = getDimensions(input.format);
   const content: Array<
     | { type: "text"; text: string }
     | { type: "image_url"; image_url: { url: string } }
@@ -927,8 +1075,8 @@ export async function generateImage(input: {
     stream: false,
     messages: [{ role: "user", content } satisfies OpenRouterMessage],
     image_config: {
-      aspect_ratio: getAspectRatio(input.format),
-      image_size: "1K",
+      width: dimensions.width,
+      height: dimensions.height,
     },
   };
 
@@ -964,13 +1112,45 @@ export async function generateImage(input: {
       stream: false,
       messages: [{ role: "user", content: input.finalPrompt }],
       image_config: {
-        aspect_ratio: getAspectRatio(input.format),
-        image_size: "1K",
+        width: dimensions.width,
+        height: dimensions.height,
       },
     };
     const retry = await requestImage(fallbackPayload);
     finalImageDataUrl = retry.imageDataUrl;
     response = retry.response;
+  }
+
+  if (typeof finalImageDataUrl !== "string") {
+    const resObj = response as Record<string, unknown>;
+    const choices = Array.isArray(resObj?.choices) ? resObj.choices as Array<Record<string, unknown>> : undefined;
+    const message = choices?.[0]?.message;
+    const normalizedMessage =
+      typeof message === "object" && message !== null && "content" in message && typeof (message as Record<string, unknown>).content === "string"
+        ? ((message as Record<string, unknown>).content as string).toLowerCase()
+        : "";
+    const looksTooLong =
+      normalizedMessage.includes("too long") ||
+      normalizedMessage.includes("shorten") ||
+      normalizedMessage.includes("simplify");
+
+    if (looksTooLong) {
+      const reducedPrompt = condenseImagePrompt(input.finalPrompt);
+      const reducedPayload = {
+        model: env.OPENROUTER_IMAGE_MODEL,
+        modalities: ["image", "text"],
+        max_tokens: 4000,
+        stream: false,
+        messages: [{ role: "user", content: reducedPrompt }],
+        image_config: {
+          width: dimensions.width,
+          height: dimensions.height,
+        },
+      };
+      const reducedRetry = await requestImage(reducedPayload);
+      finalImageDataUrl = reducedRetry.imageDataUrl;
+      response = reducedRetry.response;
+    }
   }
 
   if (typeof finalImageDataUrl !== "string") {
@@ -993,8 +1173,8 @@ export async function generateImage(input: {
           type: "openrouter:image_generation",
           parameters: {
             model: env.OPENROUTER_IMAGE_MODEL,
-            aspect_ratio: getAspectRatio(input.format),
-            image_size: "1K",
+            width: dimensions.width,
+            height: dimensions.height,
             output_format: "png",
           },
         },
@@ -1003,39 +1183,6 @@ export async function generateImage(input: {
     const toolRetry = await requestImage(toolPayload);
     finalImageDataUrl = toolRetry.imageDataUrl;
     response = toolRetry.response;
-  }
-
-  if (typeof finalImageDataUrl !== "string") {
-    const resObj = response as Record<string, unknown>;
-    const choices = Array.isArray(resObj?.choices) ? resObj.choices as Array<Record<string, unknown>> : undefined;
-    const messageText = choices?.[0]?.message && typeof choices[0].message === 'object' 
-      ? (choices[0].message as Record<string, unknown>)?.content 
-      : undefined;
-      
-    const normalizedMessage =
-      typeof messageText === "string" ? messageText.toLowerCase() : "";
-    const looksTooLong =
-      normalizedMessage.includes("too long") ||
-      normalizedMessage.includes("shorten") ||
-      normalizedMessage.includes("simplify");
-
-    if (looksTooLong) {
-      const reducedPrompt = condenseImagePrompt(input.finalPrompt);
-      const reducedPayload = {
-        model: env.OPENROUTER_IMAGE_MODEL,
-        modalities: ["image", "text"],
-        max_tokens: 4000,
-        stream: false,
-        messages: [{ role: "user", content: reducedPrompt }],
-        image_config: {
-          aspect_ratio: getAspectRatio(input.format),
-          image_size: "1K",
-        },
-      };
-      const reducedRetry = await requestImage(reducedPayload);
-      finalImageDataUrl = reducedRetry.imageDataUrl;
-      response = reducedRetry.response;
-    }
   }
 
   if (typeof finalImageDataUrl !== "string") {
@@ -1051,7 +1198,10 @@ export async function generateImage(input: {
   return {
     imageDataUrl: finalImageDataUrl,
     raw: response,
-    usage: response && typeof response === 'object' && 'usage' in response ? (response as Record<string, unknown>).usage as Record<string, unknown> : undefined,
+    usage:
+      response && typeof response === "object" && "usage" in response
+        ? (response as Record<string, unknown>).usage as Record<string, unknown>
+        : undefined,
   };
 }
 
@@ -1087,6 +1237,9 @@ export async function applyWatermark(
     </svg>
   `);
 
-  const output = await image.composite([{ input: overlay, gravity: "south" }]).png().toBuffer();
+  const output = await image
+    .composite([{ input: overlay, gravity: "south" }])
+    .png()
+    .toBuffer();
   return `data:image/png;base64,${output.toString("base64")}`;
 }
