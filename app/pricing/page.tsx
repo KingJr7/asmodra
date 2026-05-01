@@ -112,16 +112,41 @@ export default async function PricingPage() {
 
         {viewer?.user && viewer.profile ? (
           <section id="checkout" className={styles.checkoutSection}>
-            <h2 className={styles.checkoutTitle}>Paiement Mobile Rapide</h2>
-            <p className={styles.checkoutLead}>
-              Sélectionne ton offre ci-dessous et valide le message sur ton téléphone (Orange Money ou Airtel Money). 
-              Tes crédits sont activés immédiatement après confirmation.
-            </p>
-            <div style={{ maxWidth: "600px", margin: "0 auto" }}>
-              <PaymentCheckout
-                plans={checkoutItems}
-                currentPlanId={viewer.profile.plan_id as "starter" | "pro" | "business"}
-              />
+            <div className={styles.checkoutBackdrop} />
+            <div className={styles.checkoutHeader}>
+              <p className={styles.checkoutEyebrow}>Encaissement sécurisé</p>
+              <h2 className={styles.checkoutTitle}>Paiement Mobile Rapide</h2>
+              <p className={styles.checkoutLead}>
+                Sélectionne ton offre, reçois la demande sur ton téléphone, puis confirme en un clic.
+                Activation des crédits juste après validation.
+              </p>
+              <div className={styles.checkoutBadges}>
+                <span className={styles.operatorBadge}>MTN Mobile Money</span>
+                <span className={styles.operatorBadge}>Airtel Money</span>
+                <span className={styles.operatorBadge}>Référence de suivi incluse</span>
+              </div>
+            </div>
+
+            <div className={styles.checkoutGrid}>
+              <aside className={styles.checkoutAside}>
+                <h3>Comment ça marche</h3>
+                <ol className={styles.checkoutSteps}>
+                  <li>Choisis ton plan ou pack.</li>
+                  <li>Entre ton numéro MTN/Airtel Congo.</li>
+                  <li>Valide la demande reçue sur ton téléphone.</li>
+                  <li>Les crédits deviennent disponibles automatiquement.</li>
+                </ol>
+                <p className={styles.checkoutNote}>
+                  Si le réseau est lent, garde la même référence et évite de relancer plusieurs fois.
+                </p>
+              </aside>
+
+              <div className={styles.checkoutCard}>
+                <PaymentCheckout
+                  plans={checkoutItems}
+                  currentPlanId={viewer.profile.plan_id as "starter" | "pro" | "business"}
+                />
+              </div>
             </div>
           </section>
         ) : (

@@ -1,4 +1,4 @@
-import styles from "../shared-page.module.css";
+import styles from "../auth-pages.module.css";
 import Link from "next/link";
 import { AuthForm } from "@/components/auth-form";
 import { getViewer } from "@/lib/auth";

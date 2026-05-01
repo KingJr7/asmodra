@@ -30,7 +30,7 @@ const plans = [
   },
   {
     name: "Pro",
-    price: "10 000 FCFA",
+    price: "100 FCFA",
     detail: "Par mois",
     perks: ["~31 générations / mois", "Sans signature Asmodra", "Support prioritaire", "Format HD 1K"],
     featured: true,

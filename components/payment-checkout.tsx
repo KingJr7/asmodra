@@ -30,6 +30,7 @@ export function PaymentCheckout({ plans, currentPlanId, disabled = false }: Paym
   const [paymentMeta, setPaymentMeta] = useState<null | {
     reference?: string;
     status?: string;
+    activated?: boolean;
   }>(null);
   const selectedPlan = plans.find((plan) => plan.id === selectedPlanId) ?? plans[0];
 
@@ -80,6 +81,7 @@ export function PaymentCheckout({ plans, currentPlanId, disabled = false }: Paym
     setPaymentMeta({
       reference: payload.reference,
       status: payload.status,
+      activated: Boolean(payload.activated),
     });
   }
 
@@ -189,6 +191,11 @@ export function PaymentCheckout({ plans, currentPlanId, disabled = false }: Paym
         <p className={styles.hint}>
           Reference: {paymentMeta.reference}. Etat:{" "}
           {paymentMeta.status ?? "en cours"}.
+        </p>
+      ) : null}
+      {paymentMeta?.activated ? (
+        <p className={styles.success}>
+          Paiement reussi. Ton offre est active et tes credits sont disponibles.
         </p>
       ) : null}
 
