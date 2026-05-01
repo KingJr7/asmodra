@@ -75,6 +75,7 @@ export default async function GeneratePage() {
             <GenerateForm
               quotaRemaining={quota.quota_remaining}
               watermarkEnabled={quota.watermark_enabled}
+              isAdmin={viewer.profile.role === "admin"}
             />
           </div>
 

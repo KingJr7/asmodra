@@ -9,6 +9,7 @@ import { Reveal } from "./motion/reveal";
 type GenerateFormProps = {
   quotaRemaining: number;
   watermarkEnabled: boolean;
+  isAdmin: boolean;
 };
 
 type RefinementAnswer = {
@@ -16,7 +17,7 @@ type RefinementAnswer = {
   answer: string;
 };
 
-export function GenerateForm({ quotaRemaining, watermarkEnabled }: GenerateFormProps) {
+export function GenerateForm({ quotaRemaining, watermarkEnabled, isAdmin }: GenerateFormProps) {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [questionLoading, setQuestionLoading] = useState(false);
@@ -324,17 +325,19 @@ export function GenerateForm({ quotaRemaining, watermarkEnabled }: GenerateFormP
           >
             Lancer le Studio créatif
           </button>
-          <button 
-            type="submit" 
-            className={styles.secondaryButton} 
-            disabled={loading || questionLoading}
-            onClick={() => {
-              setPromptOnlyMode(true);
-              setDebugPrompt("");
-            }}
-          >
-            Concevoir le prompt
-          </button>
+          {isAdmin && (
+            <button 
+              type="submit" 
+              className={styles.secondaryButton} 
+              disabled={loading || questionLoading}
+              onClick={() => {
+                setPromptOnlyMode(true);
+                setDebugPrompt("");
+              }}
+            >
+              Concevoir le prompt
+            </button>
+          )}
         </div>
 
         {debugPrompt && (
@@ -415,7 +418,7 @@ export function GenerateForm({ quotaRemaining, watermarkEnabled }: GenerateFormP
               <span className={styles.moduleTitle}>Ton chef-d&apos;œuvre est prêt</span>
             </div>
             <button type="button" className={styles.previewZoomButton} onClick={() => setPreviewOpen(true)}>
-              <Image src={result.imageDataUrl} alt={result.title} className={styles.imagePreview} width={1200} height={1600} unoptimized />
+              <Image src={result.imageDataUrl} alt={result.title} className={`${styles.imagePreview} ${styles.resultImagePreview}`} width={1200} height={1600} unoptimized />
             </button>
             
             <div className={styles.actions}>
