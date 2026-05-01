@@ -1,0 +1,231 @@
+.dashboardPage {
+  --accent: #d2bbff;
+  --accent-glow: rgba(210, 187, 255, 0.4);
+  --bg-dark: #0a090e;
+  --card-bg: rgba(20, 18, 26, 0.6);
+  --border: rgba(210, 187, 255, 0.15);
+  --success: #b2ffcc;
+  --warning: #ffccb2;
+  
+  color: #f0f0f5;
+  padding-bottom: 6rem;
+}
+
+.hero {
+  padding: 6rem 0 4rem;
+  position: relative;
+  text-align: left;
+}
+
+.heroContent {
+  position: relative;
+  z-index: 2;
+}
+
+.welcome {
+  font-size: 0.85rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.3em;
+  color: var(--accent);
+  margin-bottom: 1rem;
+}
+
+.title {
+  font-size: clamp(2.5rem, 8vw, 4rem);
+  font-weight: 900;
+  line-height: 0.95;
+  letter-spacing: -0.04em;
+  margin-bottom: 2rem;
+  max-width: 20ch;
+}
+
+/* Stats Overview */
+.statsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 4rem;
+}
+
+.statCard {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  backdrop-filter: blur(20px);
+  padding: 2rem;
+  border-radius: 28px;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.statCard:hover {
+  border-color: var(--accent);
+  background: rgba(20, 18, 26, 0.8);
+  transform: translateY(-4px);
+}
+
+.statLabel {
+  font-size: 0.75rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  color: #a19db1;
+  margin-bottom: 0.5rem;
+}
+
+.statValue {
+  font-size: 2rem;
+  font-weight: 900;
+  color: #fff;
+  margin-bottom: 0.5rem;
+}
+
+.statSub {
+  font-size: 0.85rem;
+  color: #717082;
+}
+
+.creditBadge {
+  position: absolute;
+  top: 1.5rem;
+  right: 1.5rem;
+  background: var(--accent);
+  color: #000;
+  padding: 0.25rem 0.75rem;
+  border-radius: 999px;
+  font-size: 0.7rem;
+  font-weight: 900;
+}
+
+/* Actions Section */
+.mainActions {
+  display: flex;
+  gap: 1rem;
+  margin: 2rem 0;
+}
+
+.createBtn {
+  flex-grow: 1;
+  background: var(--accent);
+  color: #000;
+  padding: 1.5rem;
+  border-radius: 20px;
+  font-weight: 900;
+  font-size: 1.25rem;
+  text-align: center;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  transition: all 0.3s cubic-bezier(0.23, 1, 0.32, 1);
+  box-shadow: 0 0 40px rgba(210, 187, 255, 0.2);
+}
+
+.createBtn:hover {
+  background: #fff;
+  transform: scale(1.02);
+  box-shadow: 0 0 60px rgba(210, 187, 255, 0.4);
+}
+
+/* Section Header */
+.sectionHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin-bottom: 2rem;
+  padding-top: 2rem;
+}
+
+.sectionTitle {
+  font-size: 2rem;
+  font-weight: 900;
+  letter-spacing: -0.02em;
+}
+
+/* Lists and Tables */
+.activityList {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.activityItem {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--border);
+  padding: 1.5rem;
+  border-radius: 20px;
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  align-items: center;
+  gap: 1rem;
+  transition: all 0.2s ease;
+}
+
+.activityItem:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.itemInfo h4 {
+  font-size: 1rem;
+  font-weight: 800;
+  margin-bottom: 0.25rem;
+}
+
+.itemInfo p {
+  font-size: 0.85rem;
+  color: #717082;
+}
+
+.itemAmount {
+  font-weight: 800;
+  font-size: 1.1rem;
+}
+
+.itemStatus {
+  padding: 0.4rem 1rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.status-paid { background: rgba(178, 255, 204, 0.1); color: #b2ffcc; }
+.status-pending { background: rgba(255, 204, 178, 0.1); color: #ffccb2; }
+.status-failed { background: rgba(255, 178, 178, 0.1); color: #ffb2b2; }
+
+/* Forms Containers */
+.settingsSection {
+  margin-top: 6rem;
+  background: rgba(210, 187, 255, 0.03);
+  border-radius: 40px;
+  padding: 3rem;
+  border: 1px solid var(--border);
+}
+
+.formGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 3rem;
+  margin-top: 2rem;
+}
+
+.formGroup h3 {
+  font-size: 1.25rem;
+  font-weight: 800;
+  margin-bottom: 1.5rem;
+  color: var(--accent);
+}
+
+@media (max-width: 768px) {
+  .hero { padding: 4rem 0 2rem; }
+  .title { font-size: 3rem; }
+  .activityItem {
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+  }
+  .itemAmount { text-align: left; }
+  .itemStatus { width: fit-content; }
+  .settingsSection { padding: 1.5rem; }
+}

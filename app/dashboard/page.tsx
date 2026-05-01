@@ -1,4 +1,5 @@
-import styles from "../shared-page.module.css";
+import styles from "./dashboard.module.css";
+import sharedStyles from "../shared-page.module.css";
 import Link from "next/link";
 import { requireUser, computeQuotaSnapshot, isProfileOnboardingComplete } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
@@ -8,23 +9,17 @@ import { LogoutButton } from "@/components/logout-button";
 import { PasswordUpdateForm } from "@/components/password-update-form";
 import { OnboardingForm } from "@/components/onboarding-form";
 import { ResendVerificationForm } from "@/components/resend-verification-form";
+import { Reveal } from "@/components/motion/reveal";
 
 function paymentStatusLabel(status: PaymentRecord["status"]) {
   switch (status) {
-    case "paid":
-      return "paye";
-    case "processing":
-      return "en attente de confirmation";
-    case "pending":
-      return "demande creee";
-    case "failed":
-      return "echec";
-    case "expired":
-      return "expire";
-    case "cancelled":
-      return "annule";
-    default:
-      return status;
+    case "paid": return "Payé";
+    case "processing": return "En attente";
+    case "pending": return "Initié";
+    case "failed": return "Échec";
+    case "expired": return "Expiré";
+    case "cancelled": return "Annulé";
+    default: return status;
   }
 }
 
@@ -34,6 +29,7 @@ export default async function DashboardPage() {
   const quota = computeQuotaSnapshot(viewer.profile);
   const plan = getPlanDefinition(viewer.profile.plan_id);
   const onboardingComplete = isProfileOnboardingComplete(viewer.profile);
+  
   const recentPayments = supabase
     ? (
         await supabase
@@ -41,126 +37,122 @@ export default async function DashboardPage() {
           .select("*")
           .eq("user_id", viewer.user.id)
           .order("created_at", { ascending: false })
-          .limit(8)
+          .limit(5)
           .returns<PaymentRecord[]>()
       ).data
     : null;
 
-  const lastPayment = recentPayments?.[0] ?? null;
-
   return (
-    <main className={styles.page}>
-      <header className={styles.topbar}>
-        <Link href="/" className={styles.logo}>
+    <main className={sharedStyles.page}>
+      <header className={sharedStyles.topbar}>
+        <Link href="/" className={sharedStyles.logo}>
           ASMODRA
         </Link>
-        <nav className={styles.nav}>
-          <a href="/generate">Nouvelle affiche</a>
-          <a href="/pricing">Changer d&apos;offre</a>
-          <a href="/admin">Admin</a>
+        <nav className={sharedStyles.nav}>
+          <Link href="/generate">Studio</Link>
+          <Link href="/pricing">Tarifs</Link>
+          <Link href="/flyers">Galerie</Link>
+          {viewer.profile.role === "admin" && <Link href="/admin">Admin</Link>}
         </nav>
       </header>
 
-      <section className={styles.shell}>
-        <p className={styles.kicker}>Mon espace</p>
-        <h1 className={styles.title}>Retrouve tout ce qui compte au meme endroit</h1>
-        <p className={styles.lead}>
-          Ici, tu vois ton offre, tes credits restants, tes reglages et tes
-          paiements recents sans chercher partout.
-        </p>
+      <div className={styles.dashboardPage}>
+        <header className={styles.hero}>
+          <Reveal className={styles.heroContent}>
+            <span className={styles.welcome}>Tableau de bord</span>
+            <h1 className={styles.title}>
+              Bienvenue dans ton espace créatif, {viewer.profile.full_name?.split(' ')[0] || 'Artiste'}
+            </h1>
+            
+            <div className={styles.mainActions}>
+              <Link href="/generate" className={styles.createBtn}>
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                  <line x1="12" y1="5" x2="12" y2="19"></line>
+                  <line x1="5" y1="12" x2="19" y2="12"></line>
+                </svg>
+                Créer une nouvelle affiche
+              </Link>
+            </div>
+          </Reveal>
+        </header>
 
-        <div className={styles.grid4}>
-          <article className={styles.card}>
-            <h3>Offre actuelle</h3>
-            <p className={styles.meta}>{plan.name}</p>
-            <span className={styles.pill}>
-              {quota.quota_remaining} credit(s) restants
-            </span>
-            <p className={styles.meta}>
-              Mensuel: {Math.max(quota.monthly_quota - quota.quota_used, 0)} • Packs:{" "}
-              {quota.bonus_credits}
+        <section className={styles.statsGrid}>
+          <article className={styles.statCard}>
+            <span className={styles.statLabel}>Crédits disponibles</span>
+            <div className={styles.statValue}>{quota.quota_remaining}</div>
+            <p className={styles.statSub}>
+              {quota.monthly_quota - quota.quota_used} mensuels + {quota.bonus_credits} packs
+            </p>
+            <div className={styles.creditBadge}>ACTIF</div>
+          </article>
+
+          <article className={styles.statCard}>
+            <span className={styles.statLabel}>Plan Actuel</span>
+            <div className={styles.statValue}>{plan.name}</div>
+            <p className={styles.statSub}>{plan.description}</p>
+            <Link href="/pricing" style={{ fontSize: '0.8rem', color: 'var(--accent)', fontWeight: 700, textDecoration: 'none', marginTop: '1rem', display: 'block' }}>
+              Changer d&apos;offre →
+            </Link>
+          </article>
+
+          <article className={styles.statCard}>
+            <span className={styles.statLabel}>État du Profil</span>
+            <div className={styles.statValue}>{onboardingComplete ? "Complet" : "À finir"}</div>
+            <p className={styles.statSub}>
+              {onboardingComplete ? "Ton profil est prêt." : "Quelques infos manquent."}
             </p>
           </article>
-          <article className={styles.card}>
-            <h3>Profil</h3>
-            <p className={styles.meta}>
-              {onboardingComplete ? "Profil complet" : "Quelques infos manquent"}
-            </p>
-            <span className={styles.pill}>
-              {viewer.profile.onboarding_completed ? "termine" : "a completer"}
-            </span>
-          </article>
-          <article className={styles.card}>
-            <h3>Email</h3>
-            <p className={styles.meta}>{viewer.profile.email}</p>
-            <span className={styles.pill}>
-              {viewer.user.email_confirmed_at ? "verifie" : "non verifie"}
-            </span>
-          </article>
-          <article className={styles.card}>
-            <h3>Dernier paiement</h3>
-            <p className={styles.meta}>
-              {lastPayment
-                ? `${lastPayment.amount_xaf.toLocaleString("fr-FR")} FCFA`
-                : "Aucun paiement"}
-            </p>
-            <span className={styles.pill}>
-              {lastPayment ? paymentStatusLabel(lastPayment.status) : "inactif"}
-            </span>
-          </article>
-        </div>
-
-        {!viewer.user.email_confirmed_at ? (
-          <section className={styles.section}>
-            <h2>Valider mon email</h2>
-            <ResendVerificationForm email={viewer.profile.email} />
-          </section>
-        ) : null}
-
-        {!onboardingComplete ? (
-          <section className={styles.section}>
-            <h2>Completer mon profil</h2>
-            <OnboardingForm profile={viewer.profile} />
-          </section>
-        ) : null}
-
-        <section className={styles.section}>
-          <h2>Mes paiements</h2>
-          <div className={styles.grid3}>
-            {(recentPayments ?? []).length ? (
-              recentPayments?.map((item) => (
-                <article key={item.id} className={styles.card}>
-                  <h3>{item.plan_id.toUpperCase()}</h3>
-                  <p className={styles.meta}>
-                    {item.amount_xaf.toLocaleString("fr-FR")} FCFA · {paymentStatusLabel(item.status)}
-                  </p>
-                  <p className={styles.meta}>Reference: {item.provider_reference ?? "non disponible"}</p>
-                  <span className={styles.pill}>{item.operator_name ?? "momo"}</span>
-                </article>
-              ))
-            ) : (
-              <article className={styles.card}>
-                <h3>Aucun paiement pour le moment</h3>
-                <p className={styles.meta}>
-                  Tu n&apos;as pas encore essaye une offre payante avec ce compte.
-                </p>
-              </article>
-            )}
-          </div>
         </section>
 
-        <section className={styles.section}>
-          <h2>Mon mot de passe</h2>
-          <PasswordUpdateForm mode="change" />
-        </section>
+        <div className={styles.formGrid}>
+          <section className={styles.activitySection}>
+            <div className={styles.sectionHeader}>
+              <h2 className={styles.sectionTitle}>Paiements Récents</h2>
+            </div>
+            <div className={styles.activityList}>
+              {(recentPayments ?? []).length > 0 ? (
+                recentPayments?.map((item) => (
+                  <div key={item.id} className={styles.activityItem}>
+                    <div className={styles.itemInfo}>
+                      <h4>Pack {item.plan_id.toUpperCase()}</h4>
+                      <p>{new Date(item.created_at).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long' })}</p>
+                    </div>
+                    <div className={styles.itemAmount}>{item.amount_xaf.toLocaleString('fr-FR')} FCFA</div>
+                    <div className={`${styles.itemStatus} ${styles['status-' + item.status] || ''}`}>
+                      {paymentStatusLabel(item.status)}
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <p style={{ color: '#717082' }}>Aucun historique de paiement pour le moment.</p>
+              )}
+            </div>
+          </section>
 
-        <div className={styles.buttonRow}>
-          <Link href="/generate" className={styles.primaryBtn}>
-            Creer une affiche
-          </Link>
-          <LogoutButton />
+          <section className={styles.settingsSection}>
+            <h2 className={styles.sectionTitle}>Paramètres du compte</h2>
+            <div className={styles.formGrid}>
+              <div className={styles.formGroup}>
+                <h3>Sécurité</h3>
+                <PasswordUpdateForm mode="change" />
+              </div>
+              <div className={styles.formGroup}>
+                <h3>Informations</h3>
+                {!viewer.user.email_confirmed_at && (
+                  <div style={{ marginBottom: '2rem' }}>
+                    <p style={{ fontSize: '0.9rem', color: 'var(--warning)', marginBottom: '1rem' }}>Vérifie ton email pour sécuriser ton compte.</p>
+                    <ResendVerificationForm email={viewer.profile.email} />
+                  </div>
+                )}
+                <OnboardingForm profile={viewer.profile} />
+              </div>
+            </div>
+            <div style={{ marginTop: '3rem', borderTop: '1px solid var(--border)', paddingTop: '2rem' }}>
+              <LogoutButton />
+            </div>
+          </section>
         </div>
-      </section>
+      </div>
     </main>
   );
 }
