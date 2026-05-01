@@ -513,16 +513,14 @@ export function GenerateForm({ quotaRemaining, watermarkEnabled }: GenerateFormP
           />
         </div>
       ) : null}
-      {loading ? (
+      {loading || questionLoading ? (
         <div className={styles.generationOverlay}>
           <div className={styles.generationCard}>
             <div className={styles.generationOrb} />
             <p className={styles.generationTitle}>
-              {generationDone ? "Generation terminee" : "Generation en cours..."}
+              {generationDone ? "Generation terminee" : questionLoading ? "Analyse de la demande..." : "Generation en cours..."}
             </p>
-            {generationDone ? (
-              <p className={styles.generationText}>Ton affiche est prete, affichage en cours...</p>
-            ) : (
+            {!generationDone && !questionLoading ? (
               <>
                 <p className={styles.generationText}>
                   L&apos;IA construit ton affiche, ajuste la composition et prepare un rendu propre.
@@ -536,7 +534,7 @@ export function GenerateForm({ quotaRemaining, watermarkEnabled }: GenerateFormP
                   <span />
                 </div>
               </>
-            )}
+            ) : null}
           </div>
         </div>
       ) : null}

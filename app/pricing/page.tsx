@@ -1,4 +1,5 @@
-import styles from "../shared-page.module.css";
+import styles from "./pricing.module.css";
+import sharedStyles from "../shared-page.module.css";
 import Link from "next/link";
 import { CREDIT_PACK_LIST, PLAN_LIST } from "@/lib/plans";
 import { getViewer } from "@/lib/auth";
@@ -6,114 +7,131 @@ import { PaymentCheckout } from "@/components/payment-checkout";
 
 export default async function PricingPage() {
   const viewer = await getViewer();
-  const paidPlans = PLAN_LIST.filter((plan) => plan.monthlyPriceXaf > 0).map((plan) => ({
-    id: plan.id,
-    name: plan.name,
-    amountXaf: plan.monthlyPriceXaf,
-    monthlyQuota: plan.monthlyQuota,
-    description: plan.description,
-    watermark: plan.watermark,
-  }));
-  const creditPacks = CREDIT_PACK_LIST.map((pack) => ({
-    id: pack.id,
-    name: pack.name,
-    amountXaf: pack.priceXaf,
-    monthlyQuota: pack.credits,
-    description: pack.description,
-    watermark: false,
-    kind: "credit_pack" as const,
-  }));
+  
   const checkoutItems = [
-    ...paidPlans.map((plan) => ({ ...plan, kind: "plan" as const })),
-    ...creditPacks,
+    ...PLAN_LIST.filter(p => p.monthlyPriceXaf > 0).map((plan) => ({ 
+      ...plan, 
+      amountXaf: plan.monthlyPriceXaf,
+      kind: "plan" as const 
+    })),
+    ...CREDIT_PACK_LIST.map(pack => ({
+      ...pack,
+      amountXaf: pack.priceXaf,
+      monthlyQuota: pack.credits,
+      kind: "credit_pack" as const,
+      watermark: false
+    })),
   ];
 
   return (
-    <main className={styles.page}>
-      <header className={styles.topbar}>
-        <Link href="/" className={styles.logo}>
+    <main className={sharedStyles.page}>
+      <header className={sharedStyles.topbar}>
+        <Link href="/" className={sharedStyles.logo}>
           ASMODRA
         </Link>
-        <nav className={styles.nav}>
-          <a href="/generate">Studio</a>
-          <a href={viewer?.user ? "/dashboard" : "/signup"}>
+        <nav className={sharedStyles.nav}>
+          <Link href="/generate">Studio</Link>
+          <Link href={viewer?.user ? "/dashboard" : "/signup"}>
             {viewer?.user ? "Mon espace" : "Inscription"}
-          </a>
-          <a href="/support">Support</a>
+          </Link>
+          <Link href="/support">Support</Link>
         </nav>
       </header>
 
-      <section className={styles.shell}>
-        <p className={styles.kicker}>Tarifs</p>
-        <h1 className={styles.title}>Choisis ton solde de credits et ton rythme mensuel</h1>
-        <p className={styles.lead}>
-          Chaque generation et chaque retouche consomment des credits selon ton usage.
-        </p>
-        <div className={styles.grid3}>
+      <div className={styles.pricingPage}>
+        <header className={styles.header}>
+          <h1 className={styles.title}>Domine ton marché avec l&apos;IA</h1>
+          <p className={styles.lead}>
+            Des visuels de qualité agence, générés en quelques secondes. 
+            Choisis le pack qui correspond à tes ambitions.
+          </p>
+        </header>
+
+        <div className={styles.plansGrid}>
           {PLAN_LIST.map((plan) => (
             <article
               key={plan.id}
-              className={`${styles.card} ${plan.id === "pro" ? styles.featured : ""}`}
+              className={`${styles.planCard} ${plan.id === "pro" ? styles.featured : ""}`}
             >
-              <h3>{plan.name}</h3>
-              <p className={styles.meta}>
-                {plan.monthlyPriceXaf.toLocaleString("fr-FR")} FCFA par mois
+              <span className={styles.planName}>{plan.name}</span>
+              <div className={styles.planPrice}>
+                {plan.monthlyPriceXaf > 0 ? (
+                  <>
+                    {plan.monthlyPriceXaf.toLocaleString("fr-FR")}
+                    <span>FCFA/mois</span>
+                  </>
+                ) : (
+                  "Gratuit"
+                )}
+              </div>
+              
+              <p style={{ color: "#a19db1", fontSize: "0.9rem", marginBottom: "1.5rem" }}>
+                {plan.description}
               </p>
-              <p className={styles.meta}>{plan.monthlyQuota} credits / mois</p>
-              <span className={styles.pill}>
-                {plan.watermark ? "avec signature Asmodra" : "sans signature"}
-              </span>
-              <p className={styles.meta}>{plan.description}</p>
+
+              <ul className={styles.perksList}>
+                {plan.perks.map((perk, i) => (
+                  <li key={i} className={styles.perkItem}>
+                    <svg className={styles.perkIcon} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                      <polyline points="20 6 9 17 4 12"></polyline>
+                    </svg>
+                    {perk}
+                  </li>
+                ))}
+              </ul>
+
+              <Link 
+                href={viewer?.user ? "#checkout" : "/signup"} 
+                className={`${styles.planBtn} ${plan.monthlyPriceXaf > 0 ? styles.primaryBtn : styles.ghostBtn}`}
+              >
+                {viewer?.user ? (plan.monthlyPriceXaf > 0 ? "Prendre ce plan" : "Plan actuel") : "Commencer"}
+              </Link>
             </article>
           ))}
         </div>
 
-        <section className={styles.section}>
-          <h2>Packs de credits</h2>
-          <p className={styles.lead}>
-            Ces packs s&apos;ajoutent a ton solde disponible et s&apos;utilisent avec ou sans abonnement.
-          </p>
-          <div className={styles.grid2}>
+        <section className={styles.packsSection}>
+          <h2 style={{ textAlign: "center", fontSize: "2rem", fontWeight: 800, marginBottom: "2rem" }}>
+            Besoin de plus ? Packs de crédits
+          </h2>
+          <div className={styles.packsGrid}>
             {CREDIT_PACK_LIST.map((pack) => (
-              <article key={pack.id} className={styles.card}>
-                <h3>{pack.name}</h3>
-                <p className={styles.meta}>
+              <article key={pack.id} className={styles.packCard}>
+                <div className={styles.packName}>{pack.name}</div>
+                <div className={styles.packCredits}>+{pack.credits} crédits</div>
+                <div className={styles.packPrice}>
                   {pack.priceXaf.toLocaleString("fr-FR")} FCFA en une fois
+                </div>
+                <p style={{ fontSize: "0.8rem", color: "#717082", marginTop: "1rem" }}>
+                  {pack.description}
                 </p>
-                <p className={styles.meta}>{pack.credits} credits en plus</p>
-                <span className={styles.pill}>utilisable avec ou sans abonnement</span>
-                <p className={styles.meta}>{pack.description}</p>
               </article>
             ))}
           </div>
         </section>
 
         {viewer?.user && viewer.profile ? (
-          <section className={styles.section}>
-            <h2>Choisis une offre ou un pack puis paie en une fois</h2>
-            <p className={styles.lead}>
-              Selectionne ce qu&apos;il te faut, remplis tes infos une seule fois,
-              puis valide le paiement sur ton telephone. Les packs de credits
-              s&apos;ajoutent a ton total, meme sans offre mensuelle payante.
+          <section id="checkout" className={styles.checkoutSection}>
+            <h2 className={styles.checkoutTitle}>Paiement Mobile Rapide</h2>
+            <p className={styles.checkoutLead}>
+              Sélectionne ton offre ci-dessous et valide le message sur ton téléphone (Orange Money ou Airtel Money). 
+              Tes crédits sont activés immédiatement après confirmation.
             </p>
-            <PaymentCheckout
-              plans={checkoutItems}
-              currentPlanId={viewer.profile.plan_id as "starter" | "pro" | "business"}
-            />
+            <div style={{ maxWidth: "600px", margin: "0 auto" }}>
+              <PaymentCheckout
+                plans={checkoutItems}
+                currentPlanId={viewer.profile.plan_id as "starter" | "pro" | "business"}
+              />
+            </div>
           </section>
-        ) : null}
-
-        <div className={styles.buttonRow}>
-          <a href={viewer?.user ? "/dashboard" : "/signup"} className={styles.primaryBtn}>
-            {viewer?.user ? "Retour a mon espace" : "Creer mon compte"}
-          </a>
-          {!viewer?.user ? (
-            <a href="/login" className={styles.ghostBtn}>
-              Me connecter
-            </a>
-          ) : null}
-        </div>
-      </section>
+        ) : (
+          <div style={{ textAlign: "center", marginTop: "4rem" }}>
+            <Link href="/signup" className={styles.planBtn} style={{ maxWidth: "300px", display: "inline-block" }}>
+              Créer un compte pour s&apos;abonner
+            </Link>
+          </div>
+        )}
+      </div>
     </main>
   );
 }

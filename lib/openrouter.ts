@@ -727,26 +727,64 @@ export async function optimizePrompt(input: {
     ],
   });
 
-  // Étape 2 : Le Directeur Artistique (Traduction en design expressif)
+  // Étape 2 : Le Directeur Artistique (Directives strictes basées sur la BIBLE DES FLYERS ULTRA PRO)
   const daResponse = await openRouterFetch({
     model: "openai/gpt-4.1-mini",
     temperature: 0.3,
-    max_tokens: 800,
+    max_tokens: 1500,
     response_format: { type: "json_object" },
     messages: [
       {
         role: "system",
-        content: [
-          "You are a Senior Art Director for a top-tier design agency. Output MUST be valid JSON.",
-          "TA MISSION : Transformer la stratégie marketing en une directive visuelle pour un modèle image.",
-          "RÈGLES DE FOND : NEVER use flat colors or simple patterns. Backgrounds MUST be expressive, rich in texture, or cinematic. Use dramatic studio lighting, depth of field, or complex organic textures.",
-          "LANGUE : Tout texte affiché sur l'affiche DOIT être exclusivement en français (ou dans la langue du brief original).",
-          "COMPOSITION : 30-40-30 rule. Clear visual hierarchy (Product > Headline > CTA).",
-          "TEXTE : Do not transcribe lists. Integrate text as graphic design elements (hollow typography, stylized containers).",
-          "Return JSON only with keys: improved_prompt, short_title, visual_strategy, commercial_intent_classification."
-        ].join("\n")
+        content: `Tu es un Directeur Artistique Senior spécialisé dans le marché africain francophone. Ton output DOIT être en format JSON.
+        
+        Tu dois appliquer scrupuleusement la BIBLE DES FLYERS ULTRA PRO :
+        
+        1. ANATOMIE (3 ZONES):
+           - ZONE A (TÊTE, 20%): Logo/Marque, Accroche courte.
+           - ZONE B (CORPS, 60%): CENTRE DE GRAVITÉ. Élément héros (titre géant, produit cutout).
+           - ZONE C (PIED, 20%): Bande pleine largeur, Contact, Date, Lieu. Contraste fort.
+        
+        2. HIÉRARCHIE TYPOGRAPHIQUE (4 NIVEAUX):
+           - NIVEAU 1 (TITRE IMPACT): 40-60% de la hauteur. Ultra-bold, 3D ou extrusion. Premier élément lu.
+           - NIVEAU 2 (ACCROCHE): Script ou semi-bold, max 7 mots.
+           - NIVEAU 3 (INFOS CLÉS): Prix, date. TOUJOURS dans des conteneurs (badges, tickets, bulles).
+           - NIVEAU 4 (CONTACTS): Petit, lisible, dans le pied.
+           Ratio de taille 1.4x minimum entre chaque niveau.
+        
+        3. PALETTE ET COULEURS:
+           - Règle 2+1: Max 2 couleurs dominantes + 1 couleur d'accent (Or, Jaune, Rouge vif pour prix/CTA).
+           - FOND JAMAIS PLAT: Toujours dégradé, texture grain, photo floutée ou diagonal split. Profondeur obligatoire.
+           - PROTECTION TEXTE: Toujours ombre portée, halo ou fond contrasté sous le texte.
+        
+        4. DÉCORATION ET RUPTURE DU "PLAT":
+           - Utilise des 'Paint splashes', poudres Holi, confettis radialement.
+           - Géométrie flottante (triangles, cercles) à angles variés.
+           - Éléments 'Cutout' avec ombres douces (Bleeding autorisé).
+           - Bande de pied (Skyline, palmiers) pour ancrer le visuel.
+        
+        5. ARCHITECTURE PAR TYPE:
+           - ÉVÉNEMENT: Nom MEGA, Date/Heure, Lieu, Prix VIP/Standard (badges dentelés).
+           - PRODUIT/SERVICE: Nom+Logo, Tagline, Héros cutout, Prix FCFA.
+           - APP: Logo, Promesse MEGA, Mockups UI flottants, icônes trust (bouclier).
+        
+        6. RÈGLES INTERDITES (ANTI-PATTERNS):
+           - INTERDIT: Fond uni plat.
+           - INTERDIT: Texte sans protection (ombre/halo).
+           - INTERDIT: Prix flottants sans badge/conteneur.
+           - INTERDIT: Hiérarchie plate (tout en gras).
+           - INTERDIT: Transcrire les libellés littéralement (ex: pas de 'Nom:', 'Tel:').
+           - INTERDIT: Visages non-africains, contextes occidentaux.
+        
+        TON OUTPUT (JSON):
+        - improved_prompt: Prompt technique détaillé suivant ce template: [CORE CONCEPT] -> [COMPOSITION & DEPTH] (3 zones) -> [TYPOGRAPHY ARCHITECTURE] (4 niveaux) -> [LIGHTING & COLOR PALETTE] -> [DECORATIVE DETAILS] -> [TECHNICAL SPECS].
+        - short_title: Titre court.
+        - visual_strategy: Résumé de la hiérarchie visuelle appliquée.
+        - commercial_intent_classification: launch, booking, premium_positioning, general_conversion.
+        
+        IMPORTANT: Langue française obligatoire pour tout texte sur l'affiche.`
       },
-      { role: "user", content: `Stratégie : ${JSON.stringify(strategyResponse.choices[0].message.content)}` }
+      { role: "user", content: `Stratégie Marketing : ${JSON.stringify(strategyResponse.choices[0].message.content)}\nBrief Utilisateur : ${JSON.stringify(buildPromptContext(input))}` }
     ],
   });
 
@@ -774,7 +812,6 @@ export async function generateRefinementQuestions(input: {
   dominantColor?: string;
   format: GenerationFormat;
 }) {
-  const env = requireOpenRouterEnv();
   const response = await openRouterFetch({
     model: "openai/gpt-4.1-mini",
     temperature: 0.2,
@@ -928,6 +965,7 @@ export async function generateImage(input: {
       messages: [{ role: "user", content: input.finalPrompt }],
       image_config: {
         aspect_ratio: getAspectRatio(input.format),
+        image_size: "1K",
       },
     };
     const retry = await requestImage(fallbackPayload);
@@ -956,6 +994,7 @@ export async function generateImage(input: {
           parameters: {
             model: env.OPENROUTER_IMAGE_MODEL,
             aspect_ratio: getAspectRatio(input.format),
+            image_size: "1K",
             output_format: "png",
           },
         },

@@ -1,5 +1,5 @@
 export type PlanId = "starter" | "pro" | "business";
-export type CreditPackId = "credits_5" | "credits_35" | "credits_80" | "credits_180";
+export type CreditPackId = "credits_topup" | "credits_pack_small" | "credits_pack_medium" | "credits_pack_large";
 export type StoreItemId = PlanId | CreditPackId;
 
 export type PlanDefinition = {
@@ -9,6 +9,7 @@ export type PlanDefinition = {
   monthlyQuota: number;
   watermark: boolean;
   description: string;
+  perks: string[];
 };
 
 export type CreditPackDefinition = {
@@ -24,58 +25,76 @@ export const PLAN_DEFINITIONS: Record<PlanId, PlanDefinition> = {
     id: "starter",
     name: "Starter",
     monthlyPriceXaf: 0,
-    monthlyQuota: 17,
+    monthlyQuota: 20,
     watermark: true,
-    description: "Pour lancer les premiers visuels en credits, avec signature Asmodra.",
+    description: "Ideal pour tester la puissance d'Asmodra sans frais.",
+    perks: [
+      "~2 à 3 générations",
+      "Signature Asmodra obligatoire",
+      "Accès au Studio standard",
+    ],
   },
   pro: {
     id: "pro",
     name: "Pro",
-    monthlyPriceXaf: 15000,
-    monthlyQuota: 260,
+    monthlyPriceXaf: 10000,
+    monthlyQuota: 250,
     watermark: false,
-    description: "Pour les independants qui produisent regulierement avec un cout/credit optimise.",
+    description: "Pour les indépendants et créateurs sérieux.",
+    perks: [
+      "~31 générations",
+      "Sans signature Asmodra",
+      "Moteur DA Ultra Pro",
+      "Support prioritaire",
+    ],
   },
   business: {
     id: "business",
     name: "Business",
-    monthlyPriceXaf: 35000,
-    monthlyQuota: 760,
+    monthlyPriceXaf: 25000,
+    monthlyQuota: 650,
     watermark: false,
-    description: "Pour les equipes avec production continue et gros volume de generations.",
+    description: "Pour les agences et commerces à fort volume.",
+    perks: [
+      "~81 générations",
+      "Sans signature Asmodra",
+      "Toutes les fonctionnalités Pro",
+      "Générations haute priorité",
+      "Account Manager dédié",
+    ],
   },
 };
 
 export const PLAN_LIST = Object.values(PLAN_DEFINITIONS);
 
 export const CREDIT_PACK_DEFINITIONS: Record<CreditPackId, CreditPackDefinition> = {
-  credits_5: {
-    id: "credits_5",
-    name: "Top-up 5",
-    priceXaf: 1000,
-    credits: 5,
-    description: "Recharge rapide pour finir une generation ou une retouche sans prendre un gros pack.",
+  credits_topup: {
+    id: "credits_topup",
+    name: "Micro Recharge",
+    priceXaf: 2000,
+    credits: 40,
+    description: "~5 générations pour finir un projet urgent.",
   },
-  credits_35: {
-    id: "credits_35",
-    name: "Pack 35",
+  credits_pack_small: {
+    id: "credits_pack_small",
+    name: "Pack Créateur",
     priceXaf: 5000,
-    credits: 35,
-    description: "Pack flexible pour absorber les pics de generation, utilisable meme sans abonnement payant.",
+    credits: 120,
+    description: "~15 générations. Le complément idéal pour vos campagnes.",
   },
-  credits_80: {
-    id: "credits_80",
-    name: "Pack 80",
+  credits_pack_medium: {
+    id: "credits_pack_medium",
+    name: "Pack Business",
     priceXaf: 10000,
-    credits: 80,
-    description: "Le meilleur compromis pour usage hebdomadaire avec retouches et references.",
+    credits: 250,
+    description: "~31 générations. Pour un usage hebdomadaire intensif.",
   },
-  credits_180: {
-    id: "credits_180",
-    name: "Pack 180",
+  credits_pack_large: {
+    id: "credits_pack_large",
+    name: "Pack Volume",
     priceXaf: 20000,
-    credits: 180,
-    description: "Gros volume pour campagnes multiples et iterations creatives frequentes.",
+    credits: 550,
+    description: "~68 générations. La meilleure valeur pour les gros besoins.",
   },
 };
 
