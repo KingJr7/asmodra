@@ -303,12 +303,20 @@ export async function POST(request: Request) {
     }
 
     const provider = getAiProvider();
+    const userInputs = `${product} ${idea} ${mustDisplayInfo} ${customPrompt} ${refinementAnswers.map(a => a.answer).join(" ")}`.toLowerCase();
+    
+    // N'inclure les infos de profil que si elles sont mentionnées dans les inputs utilisateur
+    const businessName = (effectiveProfile.business_name && userInputs.includes(effectiveProfile.business_name.toLowerCase())) ? effectiveProfile.business_name : null;
+    const businessCategory = (effectiveProfile.business_category && userInputs.includes(effectiveProfile.business_category.toLowerCase())) ? effectiveProfile.business_category : null;
+    const city = (effectiveProfile.city && userInputs.includes(effectiveProfile.city.toLowerCase())) ? effectiveProfile.city : null;
+    const brandTone = (effectiveProfile.brand_tone && userInputs.includes(effectiveProfile.brand_tone.toLowerCase())) ? effectiveProfile.brand_tone : null;
+
     const optimized = await (provider === "puter"
       ? optimizePromptWithPuter({
-          businessName: effectiveProfile.business_name,
-          businessCategory: effectiveProfile.business_category,
-          city: effectiveProfile.city,
-          brandTone: effectiveProfile.brand_tone,
+          businessName,
+          businessCategory,
+          city,
+          brandTone,
           product,
           idea,
           customPrompt,
@@ -321,10 +329,10 @@ export async function POST(request: Request) {
         })
       : provider === "pollinations"
         ? optimizePromptWithPollinations({
-            businessName: effectiveProfile.business_name,
-            businessCategory: effectiveProfile.business_category,
-            city: effectiveProfile.city,
-            brandTone: effectiveProfile.brand_tone,
+            businessName,
+            businessCategory,
+            city,
+            brandTone,
             product,
             idea,
             customPrompt,
@@ -336,10 +344,10 @@ export async function POST(request: Request) {
             exampleImagesCount: examples.length,
           })
         : optimizePrompt({
-          businessName: effectiveProfile.business_name,
-          businessCategory: effectiveProfile.business_category,
-          city: effectiveProfile.city,
-          brandTone: effectiveProfile.brand_tone,
+          businessName,
+          businessCategory,
+          city,
+          brandTone,
           product,
           idea,
           customPrompt,
