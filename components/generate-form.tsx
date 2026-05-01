@@ -48,6 +48,7 @@ export function GenerateForm({ quotaRemaining, watermarkEnabled }: GenerateFormP
   const [refinementAnswers, setRefinementAnswers] = useState<string[]>([]);
   const [questionIndex, setQuestionIndex] = useState(0);
   const [pendingFormData, setPendingFormData] = useState<FormData | null>(null);
+  const [previewOpen, setPreviewOpen] = useState(false);
   const [revisionNote, setRevisionNote] = useState("");
   const [lastRequest, setLastRequest] = useState<null | {
     product: string;
@@ -88,7 +89,6 @@ export function GenerateForm({ quotaRemaining, watermarkEnabled }: GenerateFormP
 
   async function runGeneration(formData: FormData, questionAnswers: RefinementAnswer[]) {
     setError("");
-    setStatus("");
     setLoading(true);
     setGenerationDone(false);
     setResult(null);
@@ -186,7 +186,7 @@ export function GenerateForm({ quotaRemaining, watermarkEnabled }: GenerateFormP
       }
 
       setRefinementQuestions(questions);
-      setRefinementAnswers(questions.map(q => q.type === "single_choice" ? q.options[0] ?? "" : ""));
+      setRefinementAnswers(questions.map((q: GenerationRefinementQuestion) => q.type === "single_choice" ? q.options[0] ?? "" : ""));
       setQuestionIndex(0);
       setPendingFormData(formData);
     } catch {
