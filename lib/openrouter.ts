@@ -676,6 +676,8 @@ IMPORTANT:
 - Any text that must appear on the flyer itself must be written in French exactly as requested by the brief.
 - Never invent brand names, dates, phone numbers, addresses, prices, or offers.
 - Prefer strong composition, clear hierarchy, and premium photorealistic compositing over decorative clutter.
+- Preserve every useful piece of the brief; do not shorten, summarize, or remove important marketing intent.
+- When the brief is about technology, software, app, AI, digital services, gadgets, online platforms, or SaaS, apply the TECHNOLOGY MODE first and prioritize premium digital aesthetics, interface realism, and structured text zoning.
 
 ────────────────────────────────────────────────────────
 DESIGN GOAL
@@ -689,6 +691,9 @@ Create a flyer that feels like a real high-end advertising poster:
 - clean but rich composition
 - readable at mobile size
 - print-friendly and social-media-friendly
+- text-rich but never overloaded
+- visually structured, not crowded
+- designed to convert, not just to look pretty
 
 ────────────────────────────────────────────────────────
 VISUAL SYSTEM
@@ -700,6 +705,12 @@ Every flyer must be built around these 4 layers, from back to front:
 4. Typography and CTA blocks
 
 The composition must feel intentional and balanced, not random.
+
+For technology flyers, the 4 layers should usually become:
+1. Digital atmosphere or gradient studio background
+2. Interface glow, particles, UI fragments, data lines, floating icons
+3. Main hero product or device mockup with realistic screen rendering
+4. Text modules, feature cards, badges, CTA, proof points, and footer info
 
 ────────────────────────────────────────────────────────
 CORE LAYOUT RULE
@@ -724,6 +735,13 @@ FOOTER:
 - use badges, pills, circles, ribbons, or banners for key commercial info
 - never leave important details as tiny plain text
 
+For technology flyers specifically:
+- the hero should be a device, app screen, dashboard, software interface, cloud service scene, AI tool visual, gadget, or premium digital ecosystem
+- the screen content must feel like a real product UI, not a generic rectangle
+- use layered information blocks instead of one huge wall of text
+- add technical proof points, feature callouts, and benefit microcopy in separate modules
+- keep the layout editorial, sleek, and highly legible
+
 ────────────────────────────────────────────────────────
 TYPOGRAPHY RULES
 ────────────────────────────────────────────────────────
@@ -736,6 +754,16 @@ TYPOGRAPHY RULES
 - Use high contrast and shadows for legibility
 - Do not use font names
 - Do not let text float unprotected on busy backgrounds
+
+For technology flyers:
+- allow more text than usual, but distribute it into structured zones
+- use short lines, stacked statements, bullet-like microblocks, feature chips, labels, callout cards, and CTA ribbons
+- make the hierarchy obvious: title > subtitle > benefit points > details > contacts
+- keep each text block short enough to read instantly
+- never place too many words inside one single area
+- emphasize key numbers, names, and action phrases with strong contrast or container shapes
+- include UI-style labels, app tabs, badges, and tiny status text when appropriate
+- text should feel like part of a modern product interface or premium ad layout, not like pasted paragraphs
 
 ────────────────────────────────────────────────────────
 STYLE DIRECTIONS
@@ -757,6 +785,26 @@ EVENT:
 SERVICE / BRAND:
 - professional, confident, polished, conversion-focused, clean hierarchy, strong CTA
 
+TECHNOLOGY / DIGITAL / APP / AI / SAAS / GADGETS:
+- premium futuristic but realistic
+- sleek studio lighting
+- glossy or matte device renders
+- floating UI panels
+- app dashboard fragments
+- glassmorphism or soft neon accents when appropriate
+- subtle grid, data lines, digital particles, signal waves, interface glow
+- elegant reflections, edge lighting, screen light spill
+- smart use of dark mode, blue tones, cyan, violet, chrome, white, black, silver, or gradient blends
+- strong sense of innovation, trust, precision, speed, and conversion
+- clean background with depth, never chaotic
+- interface should look like a real modern product, not a toy mockup
+- product composition should feel high-end like an ad for a major software, mobile app, fintech, AI assistant, streaming platform, e-commerce, or modern hardware brand
+- use device perspective carefully: no warped screens, no distorted bezels, no broken proportions
+- show believable UI with legible layout blocks, charts, cards, buttons, icons, and small indicators
+- if multiple text blocks are needed, turn them into interface sections, feature panels, or modular cards rather than flat paragraphs
+- use motion cues such as light trails, glow arcs, data flow, or floating content to suggest speed and intelligence
+- make the flyer feel premium, useful, and futuristic, but still human and commercially persuasive
+
 ────────────────────────────────────────────────────────
 COLOR RULES
 ────────────────────────────────────────────────────────
@@ -767,6 +815,12 @@ COLOR RULES
 - Prefer gradients, textured surfaces, soft bokeh, or atmospheric scenes
 - Keep colors rich, deep, and premium
 - Avoid chaotic multicolor unless the brief clearly asks for a festive look
+
+For technology flyers:
+- prefer sophisticated digital palettes such as deep blue, electric cyan, neon green accents, violet, silver, white, graphite, black, or gradient tech tones
+- use luminous accents sparingly to create premium contrast
+- avoid childish rainbow effects unless explicitly requested
+- ensure screen glow and UI accents support the main subject without overpowering the text
 
 ────────────────────────────────────────────────────────
 DECORATIVE RULES
@@ -788,6 +842,13 @@ Decorations must:
 - guide the eye
 - never overwhelm the text
 
+For technology flyers:
+- use UI particles, interface fragments, signal waves, data lines, digital grids, holographic panels, light rings, floating icons, app cards, and soft glow beams
+- add only decorations that feel like part of a tech ecosystem
+- no random sparkles unless they clearly reinforce the premium digital mood
+- use reflections, transparent layers, and screen-light atmosphere to make the composition feel advanced
+- if there is a device, let the decoration radiate from the screen or from the product itself
+
 ────────────────────────────────────────────────────────
 REFERENCE IMAGE RULES
 ────────────────────────────────────────────────────────
@@ -797,6 +858,32 @@ If reference images are provided:
 - do not copy mechanically
 - adapt the style to the new brief
 - keep the flyer's commercial logic stronger than the reference layout
+
+If the reference is a technology flyer:
+- preserve the premium digital feel, but improve clarity, hierarchy, realism, and UI quality
+- upgrade the interface mockups so they look cleaner, sharper, and more modern
+- improve text organization into readable modules
+- keep the product central and make the screen or interface believable
+
+────────────────────────────────────────────────────────
+TEXT HANDLING RULES FOR BUSIER FLYERS
+────────────────────────────────────────────────────────
+Some briefs require more text. In that case:
+- use a layered text architecture
+- split text into headline, subtitle, benefit cards, feature chips, trust badges, CTA, and footer info
+- never place all text in one block
+- every paragraph must be short and easy to scan
+- use line breaks strategically
+- highlight only the most important words
+- avoid overloading the center of the composition
+- maintain breathing room around important typography
+- let the design contain the text, not fight it
+- when there is more information, increase structure instead of increasing clutter
+
+For technology flyers:
+- it is acceptable to include more text than in lifestyle posters, but only if the text is organized like a clean app interface or a premium landing page section
+- use up to several short content zones, each with one clear purpose
+- combine marketing copy with interface styling to make the flyer feel intelligent and complete
 
 ────────────────────────────────────────────────────────
 QUALITY REQUIREMENTS
@@ -813,6 +900,13 @@ The flyer must look:
 - print-ready
 - visually dense but controlled
 - designed for African francophone markets
+
+For technology flyers:
+- the product should look launch-ready
+- the UI should feel realistic and polished
+- the screen rendering should be crisp
+- the scene should feel like a serious product ad, not a generic template
+- the final result should look suitable for a startup launch, app promotion, digital campaign, or premium online ad
 
 ────────────────────────────────────────────────────────
 NEGATIVE CONSTRAINTS
@@ -835,6 +929,14 @@ Avoid:
 - distorted product shapes
 - fake-looking faces
 - overdone cartoon style unless requested
+- warped device screens
+- oversized bezels
+- broken UI perspective
+- unreadable interface elements
+- fake app mockups that look pasted on
+- excessive icon clutter
+- overly noisy futuristic effects
+- sci-fi effects that reduce commercial realism
 
 ────────────────────────────────────────────────────────
 OUTPUT FORMAT
@@ -847,6 +949,7 @@ Return JSON only with these keys:
   "commercial_intent_classification": "launch | promotion | booking | premium_positioning | general_conversion"
 }
 `;
+
 export async function optimizePrompt(input: {
   businessName?: string | null;
   businessCategory?: string | null;
