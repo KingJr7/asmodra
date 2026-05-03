@@ -12,7 +12,6 @@ import {
   optimizePromptWithPollinations,
 } from "@/lib/pollinations";
 import {
-  assertAllowedFile,
   enforceRateLimit,
   hashString,
   sanitizeMultiline,
@@ -20,9 +19,8 @@ import {
 } from "@/lib/security";
 import { getAiProvider } from "@/lib/ai-provider";
 import { getPlanDefinition } from "@/lib/plans";
-import { uploadAsset } from "@/lib/storage";
 import { computeCreditsCost } from "@/lib/credits";
-import type { GenerationFormat, ProfileRecord } from "@/lib/types";
+import type { GenerationFormat, ProfileRecord, ReferenceKind } from "@/lib/types";
 
 const allowedFormats: GenerationFormat[] = ["square", "story", "print"];
 
@@ -236,6 +234,9 @@ export async function POST(request: Request) {
     const refinementAnswers = parseRefinementAnswers(refinementAnswersRaw);
     const promptOnly = formData.get("prompt_only") === "true";
 
+    // Get reference IDs from form
+    const referenceIds = formData.getAll("reference_ids").filter((id): id is string => typeof id === "string");
+
     if (!product || !idea || !allowedFormats.includes(format)) {
       return NextResponse.json(
         { error: "Les champs de generation sont invalides." },
@@ -243,24 +244,55 @@ export async function POST(request: Request) {
       );
     }
 
-    const references = formData
-      .getAll("references")
-      .filter((entry): entry is File => entry instanceof File && entry.size > 0);
-    const examples = formData
-      .getAll("examples")
-      .filter((entry): entry is File => entry instanceof File && entry.size > 0);
+    // Fetch reference images from database
+    let referenceImages: Array<{ id: string; path: string; kind: string }> = [];
+    if (referenceIds.length > 0) {
+      const { data, error } = await admin
+        .from("reference_images")
+        .select("id, path, kind")
+        .in("id", referenceIds)
+        .eq("user_id", user.id);
 
-    const totalUploadBytes = [...references, ...examples].reduce(
-      (sum, file) => sum + file.size,
-      0,
-    );
+      if (error) {
+        return NextResponse.json(
+          { error: "Erreur lors du chargement des références." },
+          { status: 500 },
+        );
+      }
+
+      referenceImages = data || [];
+
+      // Verify all requested references were found and belong to user
+      if (referenceImages.length !== referenceIds.length) {
+        return NextResponse.json(
+          { error: "Une ou plusieurs références introuvables." },
+          { status: 400 },
+        );
+      }
+    }
+
+    // Create signed URLs for referenced images
+    const referenceDataUrls: string[] = [];
+    for (const ref of referenceImages) {
+      const { data: signed } = await admin.storage
+        .from("brand-assets")
+        .createSignedUrl(ref.path, 60 * 60);
+
+      if (signed?.signedUrl) {
+        referenceDataUrls.push(signed.signedUrl);
+      }
+    }
+
+     // Calculate credits based on reference types
     const creditsCost = computeCreditsCost({
       format,
-      referencesCount: references.length,
-      examplesCount: examples.length,
-      totalUploadBytes,
+      referencesCount: referenceImages.length,
+      referencesBreakdown: referenceImages.map(ref => ({ kind: ref.kind as ReferenceKind })),
+      examplesCount: 0,
+      totalUploadBytes: 0,
       hasCustomPrompt: Boolean(customPrompt.trim()),
     });
+
     const { data: reservationData, error: reservationError } = await admin.rpc(
       "reserve_generation_quota",
       {
@@ -290,19 +322,6 @@ export async function POST(request: Request) {
       );
     }
 
-    const referenceDataUrls: string[] = [];
-
-    for (const file of [...references, ...examples]) {
-      assertAllowedFile(file);
-      const buffer = Buffer.from(await file.arrayBuffer());
-      referenceDataUrls.push(`data:${file.type};base64,${buffer.toString("base64")}`);
-      await uploadAsset({
-        userId: user.id,
-        file,
-        kind: references.includes(file) ? "reference" : "example",
-      });
-    }
-
     const provider = getAiProvider();
     const userInputs = `${product} ${idea} ${mustDisplayInfo} ${customPrompt} ${refinementAnswers.map(a => a.answer).join(" ")}`.toLowerCase();
     
@@ -325,8 +344,8 @@ export async function POST(request: Request) {
           dominantColor,
           refinementAnswers,
           format,
-          referenceImagesCount: references.length,
-          exampleImagesCount: examples.length,
+          referenceImagesCount: referenceImages.length,
+          exampleImagesCount: 0,
         })
       : provider === "pollinations"
         ? optimizePromptWithPollinations({
@@ -341,8 +360,8 @@ export async function POST(request: Request) {
             dominantColor,
             refinementAnswers,
             format,
-            referenceImagesCount: references.length,
-            exampleImagesCount: examples.length,
+            referenceImagesCount: referenceImages.length,
+            exampleImagesCount: 0,
           })
         : optimizePrompt({
           businessName,
@@ -356,8 +375,8 @@ export async function POST(request: Request) {
           dominantColor,
           refinementAnswers,
           format,
-          referenceImagesCount: references.length,
-          exampleImagesCount: examples.length,
+          referenceImagesCount: referenceImages.length,
+          exampleImagesCount: 0,
         }));
 
     if (promptOnly) {
@@ -499,18 +518,20 @@ export async function POST(request: Request) {
           title: optimized.short_title,
           caption: optimized.social_caption,
           usage: generated.usage,
-          reference_count: referenceDataUrls.length,
-          examples_count: examples.length,
-          upload_bytes: totalUploadBytes,
+          reference_count: referenceImages.length,
+          reference_ids: referenceIds,
+          reference_kinds: referenceImages.map(r => r.kind),
+          examples_count: 0,
+          upload_bytes: 0,
           credits_cost_breakdown: creditsCost,
           visual_strategy: optimized.visual_strategy,
           audience_angle: optimized.audience_angle,
           layout_strategy: optimized.layout_strategy,
-            image_direction: optimized.image_direction,
-            must_display_info: mustDisplayInfo || null,
-            dominant_color: dominantColor || null,
-            refinement_answers: refinementAnswers,
-          },
+          image_direction: optimized.image_direction,
+          must_display_info: mustDisplayInfo || null,
+          dominant_color: dominantColor || null,
+          refinement_answers: refinementAnswers,
+        },
       },
     );
 

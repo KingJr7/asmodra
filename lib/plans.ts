@@ -37,7 +37,7 @@ export const PLAN_DEFINITIONS: Record<PlanId, PlanDefinition> = {
   pro: {
     id: "pro",
     name: "Pro",
-    monthlyPriceXaf: 100,
+    monthlyPriceXaf: 10000,
     monthlyQuota: 250,
     watermark: false,
     description: "Pour les indépendants et créateurs sérieux.",

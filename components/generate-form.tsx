@@ -2,7 +2,9 @@
 
 import { useMemo, useState, type FormEvent } from "react";
 import Image from "next/image";
-import type { GenerationRefinementQuestion } from "@/lib/types";
+import type { GenerationRefinementQuestion, ReferenceKind } from "@/lib/types";
+import { computeCreditsCost } from "@/lib/credits";
+import { ReferenceGallery } from "./reference-gallery";
 import styles from "./forms.module.css";
 import { Reveal } from "./motion/reveal";
 
@@ -22,6 +24,16 @@ export function GenerateForm({ quotaRemaining, watermarkEnabled, isAdmin }: Gene
   const [loading, setLoading] = useState(false);
   const [questionLoading, setQuestionLoading] = useState(false);
   const [generationDone, setGenerationDone] = useState(false);
+  
+  // Form state for cost calculation
+  const [format, setFormat] = useState<"square" | "story" | "print">("square");
+  const [customPrompt, setCustomPrompt] = useState("");
+  
+  // Reference selections
+  const [selectedLogos, setSelectedLogos] = useState<string[]>([]);
+  const [selectedProducts, setSelectedProducts] = useState<string[]>([]);
+  const [selectedStyleGuides, setSelectedStyleGuides] = useState<string[]>([]);
+  
   const [result, setResult] = useState<null | {
     imageDataUrl: string;
     title: string;
@@ -61,6 +73,23 @@ export function GenerateForm({ quotaRemaining, watermarkEnabled, isAdmin }: Gene
     dominantColor: string;
     refinementAnswersJson: string;
   }>(null);
+
+  // Calculate estimated cost dynamically
+  const estimatedCost = useMemo(() => {
+    const breakdown = computeCreditsCost({
+      format,
+      referencesCount: selectedLogos.length + selectedProducts.length + selectedStyleGuides.length,
+      referencesBreakdown: [
+        ...selectedLogos.map(() => ({ kind: "logo" as ReferenceKind })),
+        ...selectedProducts.map(() => ({ kind: "product" as ReferenceKind })),
+        ...selectedStyleGuides.map(() => ({ kind: "style_guide" as ReferenceKind })),
+      ],
+      examplesCount: 0,
+      totalUploadBytes: 0,
+      hasCustomPrompt: customPrompt.trim() ? true : false,
+    });
+    return breakdown;
+  }, [format, customPrompt, selectedLogos, selectedProducts, selectedStyleGuides]);
 
   const currentQuestion = useMemo(
     () => refinementQuestions[questionIndex] ?? null,
@@ -213,7 +242,18 @@ export function GenerateForm({ quotaRemaining, watermarkEnabled, isAdmin }: Gene
     event.preventDefault();
     setResult(null);
     closeQuestionFlow();
-    await startRefinement(new FormData(event.currentTarget));
+    const formData = new FormData(event.currentTarget);
+    
+    // Ensure format is set
+    formData.set("format", format);
+    formData.set("custom_prompt", customPrompt);
+    
+    // Add reference IDs
+    selectedLogos.forEach(id => formData.append("reference_ids", id));
+    selectedProducts.forEach(id => formData.append("reference_ids", id));
+    selectedStyleGuides.forEach(id => formData.append("reference_ids", id));
+    
+    await startRefinement(formData);
   }
 
   async function handleQuestionNext() {
@@ -257,14 +297,23 @@ export function GenerateForm({ quotaRemaining, watermarkEnabled, isAdmin }: Gene
               <label className={styles.label} htmlFor="product">Produit ou Service</label>
               <input id="product" name="product" className={styles.input} placeholder="Ex: Pack burger duo, Promo coiffure..." required />
             </div>
+          <div className={styles.row}>
             <div>
               <label className={styles.label} htmlFor="format">Format de sortie</label>
-              <select id="format" name="format" className={styles.select} defaultValue="square">
+              <select 
+                id="format" 
+                name="format" 
+                className={styles.select} 
+                value={format}
+                onChange={(e) => setFormat(e.target.value as "square" | "story" | "print")}
+                defaultValue="square"
+              >
                 <option value="square">Carré 1:1 (Insta/WA)</option>
                 <option value="story">Story 9:16 (WA/TikTok)</option>
                 <option value="print">Affiche A4/A3</option>
               </select>
             </div>
+          </div>
           </div>
 
           <div>
@@ -292,7 +341,14 @@ export function GenerateForm({ quotaRemaining, watermarkEnabled, isAdmin }: Gene
             </div>
             <div>
               <label className={styles.label} htmlFor="custom_prompt">Style ou ambiance spécifique</label>
-              <input id="custom_prompt" name="custom_prompt" className={styles.input} placeholder="Ex: Luxe, Street, Épuré..." />
+              <input 
+                id="custom_prompt" 
+                name="custom_prompt" 
+                className={styles.input} 
+                placeholder="Ex: Luxe, Street, Épuré..."
+                value={customPrompt}
+                onChange={(e) => setCustomPrompt(e.target.value)}
+              />
             </div>
           </div>
         </div>
@@ -304,16 +360,29 @@ export function GenerateForm({ quotaRemaining, watermarkEnabled, isAdmin }: Gene
             <span className={styles.moduleTitle}>Tes ressources</span>
           </div>
 
-          <div className={styles.row}>
-            <div>
-              <label className={styles.label}>Photos (Produit, Logo...)</label>
-              <input name="references" className={styles.file} type="file" accept="image/*" multiple />
-            </div>
-            <div>
-              <label className={styles.label}>Inspirations (Styles aimés)</label>
-              <input name="examples" className={styles.file} type="file" accept="image/*" multiple />
-            </div>
-          </div>
+          <ReferenceGallery
+            kind="logo"
+            label="Logo Professionnel"
+            icon="📦"
+            selectedIds={selectedLogos}
+            onSelectionChange={setSelectedLogos}
+          />
+
+          <ReferenceGallery
+            kind="product"
+            label="Photos Produit"
+            icon="📸"
+            selectedIds={selectedProducts}
+            onSelectionChange={setSelectedProducts}
+          />
+
+          <ReferenceGallery
+            kind="style_guide"
+            label="Guide de Style"
+            icon="💡"
+            selectedIds={selectedStyleGuides}
+            onSelectionChange={setSelectedStyleGuides}
+          />
         </div>
 
         <div className={styles.actions}>
@@ -372,7 +441,7 @@ export function GenerateForm({ quotaRemaining, watermarkEnabled, isAdmin }: Gene
         )}
 
         <p className={styles.hint}>
-          Crédits disponibles: <strong>{quotaRemaining}</strong> • Signature Asmodra: <strong>{watermarkEnabled ? "Oui" : "Non"}</strong>
+          Crédits disponibles: <strong>{quotaRemaining}</strong> • Coût estimé: <strong>{estimatedCost.total}</strong> crédits • Signature Asmodra: <strong>{watermarkEnabled ? "Oui" : "Non"}</strong>
         </p>
 
         {error && <p className={styles.error}>{error}</p>}

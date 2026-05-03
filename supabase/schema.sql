@@ -606,6 +606,30 @@ on public.generation_quota_reservations for select
 to authenticated
 using (false);
 
+create table if not exists public.reference_images (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null references public.profiles (id) on delete cascade,
+  kind text not null check (kind in ('logo', 'product', 'style_guide')),
+  name text not null,
+  path text not null,
+  bytes integer not null,
+  created_at timestamptz not null default now(),
+  unique(user_id, path)
+);
+
+create table if not exists public.generation_references (
+  id uuid primary key default gen_random_uuid(),
+  generation_id uuid not null references public.generation_audits (id) on delete cascade,
+  reference_image_id uuid not null references public.reference_images (id) on delete cascade,
+  kind text not null check (kind in ('input', 'example')),
+  created_at timestamptz not null default now(),
+  unique(generation_id, reference_image_id)
+);
+
+create index if not exists idx_reference_images_user_id on public.reference_images(user_id);
+create index if not exists idx_reference_images_kind on public.reference_images(kind);
+create index if not exists idx_generation_references_generation_id on public.generation_references(generation_id);
+
 insert into storage.buckets (id, name, public)
 values ('brand-assets', 'brand-assets', false)
 on conflict (id) do nothing;

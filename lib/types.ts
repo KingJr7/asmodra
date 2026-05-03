@@ -8,6 +8,7 @@ export type PaymentStatus =
   | "cancelled";
 export type SubscriptionStatus = "inactive" | "pending" | "active" | "expired";
 export type GenerationFormat = "square" | "story" | "print";
+export type ReferenceKind = "logo" | "product" | "style_guide";
 
 export type ProfileRecord = {
   id: string;
@@ -100,4 +101,14 @@ export type GenerationRefinementQuestion = {
   type: GenerationRefinementQuestionType;
   placeholder: string;
   options: string[];
+};
+
+export type ReferenceImage = {
+  id: string;
+  userId: string;
+  kind: ReferenceKind;
+  name: string;
+  path: string;
+  bytes: number;
+  createdAt: string;
 };

@@ -1,4 +1,4 @@
-import type { GenerationFormat } from "@/lib/types";
+import type { GenerationFormat, ReferenceKind } from "@/lib/types";
 
 const XAF_PER_USD = 620;
 
@@ -23,15 +23,34 @@ const ESTIMATED_TOKENS = {
   perUploadedImagePromptOverhead: 220,
 };
 
+// Reference image costs by type (tripled to match API costs increase)
+const REFERENCE_COSTS: Record<ReferenceKind, number> = {
+  logo: 6,
+  product: 9,
+  style_guide: 12,
+};
+
 export function computeCreditsCost(input: {
   format: GenerationFormat;
   referencesCount: number;
+  referencesBreakdown?: Array<{ kind: ReferenceKind }>;
   examplesCount: number;
   totalUploadBytes: number;
   hasCustomPrompt: boolean;
 }) {
   const formatBase = input.format === "story" ? 10 : input.format === "print" ? 12 : 8;
-  const referenceCost = input.referencesCount * 3;
+  
+  // Calculate reference cost based on breakdown if available, otherwise use old logic
+  let referenceCost = 0;
+  if (input.referencesBreakdown && input.referencesBreakdown.length > 0) {
+    referenceCost = input.referencesBreakdown.reduce(
+      (sum, ref) => sum + REFERENCE_COSTS[ref.kind],
+      0
+    );
+  } else {
+    referenceCost = input.referencesCount * 3; // Fallback for old API calls
+  }
+
   const exampleCost = input.examplesCount * 2;
   const uploadWeightCost = Math.ceil(input.totalUploadBytes / (4 * 1024 * 1024));
   const briefComplexityCost = input.hasCustomPrompt ? 1 : 0;
