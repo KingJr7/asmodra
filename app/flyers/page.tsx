@@ -1,5 +1,6 @@
 import styles from "../shared-page.module.css";
 import Link from "next/link";
+import { MainNavigation } from "@/components/main-navigation";
 import { requireOnboardedUser } from "@/lib/auth";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { FlyersGalleryGrid } from "@/components/flyers-gallery-grid";
@@ -57,11 +58,7 @@ export default async function FlyersPage() {
         <Link href="/" className={styles.logo}>
           ASMODRA
         </Link>
-        <nav className={styles.nav}>
-          <a href="/generate">Creation</a>
-          <a href="/pricing">Tarifs</a>
-          <a href="/dashboard">Mon espace</a>
-        </nav>
+        <MainNavigation currentUser={true} />
       </header>
 
       <section className={styles.shell}>

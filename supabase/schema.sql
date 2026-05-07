@@ -13,13 +13,14 @@ create table if not exists public.plans (
 
 insert into public.plans (id, name, monthly_price_xaf, monthly_quota, watermark, description)
 values
-  ('starter', 'Starter', 0, 17, true, 'Plan gratuit en credits avec watermark.'),
-  ('pro', 'Pro', 15000, 260, false, 'Plan mensuel optimise pour production reguliere.'),
-  ('business', 'Business', 35000, 760, false, 'Plan mensuel pour volumes eleves.'),
-  ('credits_5', 'Top-up 5', 1000, 5, false, 'Micro recharge 5 credits.'),
-  ('credits_35', 'Pack 35', 5000, 35, false, 'Pack flexible 35 credits.'),
-  ('credits_80', 'Pack 80', 10000, 80, false, 'Pack standard 80 credits.'),
-  ('credits_180', 'Pack 180', 20000, 180, false, 'Pack volume 180 credits.')
+  ('starter', 'Starter', 0, 40, true, 'Plan gratuit en credits avec watermark.'),
+  ('pro', 'Pro', 15000, 250, false, 'Plan mensuel optimise pour production reguliere.'),
+  ('business', 'Business', 25000, 480, false, 'Plan mensuel pour volumes eleves.'),
+  ('credits_pack_oneshot', 'One-shot', 500, 8, false, '1 generation rapide pour un besoin ponctuel.'),
+  ('credits_topup', 'Micro Recharge', 2000, 40, false, 'Recharge credits pour finir un projet urgent.'),
+  ('credits_pack_small', 'Pack Createur', 5000, 120, false, 'Pack credits complementaire pour campagnes.'),
+  ('credits_pack_medium', 'Pack Business', 10000, 250, false, 'Pack credits pour usage intensif.'),
+  ('credits_pack_large', 'Pack Volume', 20000, 550, false, 'Pack credits meilleur rapport volume.')
 on conflict (id) do update
 set
   name = excluded.name,
@@ -31,7 +32,17 @@ set
 
 update public.plans
 set active = false
-where id in ('credits_10', 'credits_25', 'credits_55', 'credits_130', 'credits_300');
+where id in (
+  'credits_10',
+  'credits_25',
+  'credits_55',
+  'credits_130',
+  'credits_300',
+  'credits_5',
+  'credits_35',
+  'credits_80',
+  'credits_180'
+);
 
 create table if not exists public.profiles (
   id uuid primary key references auth.users (id) on delete cascade,

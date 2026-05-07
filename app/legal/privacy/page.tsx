@@ -1,4 +1,5 @@
 import styles from "../../shared-page.module.css";
+import { MainNavigation } from "@/components/main-navigation";
 import Link from "next/link";
 
 export default function PrivacyPage() {
@@ -8,10 +9,7 @@ export default function PrivacyPage() {
         <Link href="/" className={styles.logo}>
           ASMODRA
         </Link>
-        <nav className={styles.nav}>
-          <a href="/legal/cgu">CGU</a>
-          <a href="/legal/mentions">Mentions</a>
-        </nav>
+        <MainNavigation currentUser={true} />
       </header>
 
       <section className={styles.shell}>

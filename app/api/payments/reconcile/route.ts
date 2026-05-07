@@ -2,36 +2,7 @@ import { NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { requireServerEnv } from "@/lib/env";
 import { getPaymentIntent } from "@/lib/yabetoo";
-import type { PaymentRecord } from "@/lib/types";
-
-async function activatePlan(payment: Pick<PaymentRecord, "plan_id" | "user_id" | "provider_reference">) {
-  const admin = createAdminClient();
-  const endsAt = new Date();
-  endsAt.setMonth(endsAt.getMonth() + 1);
-
-  await admin
-    .from("profiles")
-    .update({
-      plan_id: payment.plan_id,
-    })
-    .eq("id", payment.user_id);
-
-  await admin.from("subscriptions").upsert(
-    {
-      user_id: payment.user_id,
-      plan_id: payment.plan_id,
-      status: "active",
-      started_at: new Date().toISOString(),
-      ends_at: endsAt.toISOString(),
-      renewed_manually: true,
-      payment_reference: payment.provider_reference,
-    },
-    {
-      onConflict: "user_id",
-      ignoreDuplicates: false,
-    },
-  );
-}
+import { activateSuccessfulPurchase } from "@/lib/purchases";
 
 export async function POST(request: Request) {
   const auth = request.headers.get("authorization");
@@ -72,7 +43,7 @@ export async function POST(request: Request) {
       .eq("id", payment.id);
 
     if (status === "succeeded" || status === "completed") {
-      await activatePlan(payment);
+      await activateSuccessfulPurchase(payment, providerState, "reconcile");
     }
 
     results.push({

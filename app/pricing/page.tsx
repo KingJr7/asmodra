@@ -1,6 +1,7 @@
 import styles from "./pricing.module.css";
 import sharedStyles from "../shared-page.module.css";
 import Link from "next/link";
+import { MainNavigation } from "@/components/main-navigation";
 import { CREDIT_PACK_LIST, PLAN_LIST } from "@/lib/plans";
 import { getViewer } from "@/lib/auth";
 import { PaymentCheckout } from "@/components/payment-checkout";
@@ -29,13 +30,7 @@ export default async function PricingPage() {
         <Link href="/" className={sharedStyles.logo}>
           ASMODRA
         </Link>
-        <nav className={sharedStyles.nav}>
-          <Link href="/generate">Studio</Link>
-          <Link href={viewer?.user ? "/dashboard" : "/signup"}>
-            {viewer?.user ? "Mon espace" : "Inscription"}
-          </Link>
-          <Link href="/support">Support</Link>
-        </nav>
+        <MainNavigation currentUser={!!viewer?.user} />
       </header>
 
       <div className={styles.pricingPage}>

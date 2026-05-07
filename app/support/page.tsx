@@ -1,5 +1,6 @@
 import styles from "../shared-page.module.css";
 import Link from "next/link";
+import { MainNavigation } from "@/components/main-navigation";
 
 export default function SupportPage() {
   return (
@@ -8,11 +9,7 @@ export default function SupportPage() {
         <Link href="/" className={styles.logo}>
           ASMODRA
         </Link>
-        <nav className={styles.nav}>
-          <a href="/dashboard">Mon espace</a>
-          <a href="/pricing">Tarifs</a>
-          <a href="/legal/cgu">CGU</a>
-        </nav>
+        <MainNavigation currentUser={true} />
       </header>
 
       <section className={styles.shell}>

@@ -1060,13 +1060,12 @@ export async function generateRefinementQuestions(input: {
         role: "system",
         content:
           [
-            "You are a Strategic Marketing Designer. Your goal is to refine the flyer brief by asking exactly the right questions to ensure professional results.",
-            "1. ANALYSIS: First, think about the business purpose (Launch, Booking, Branding, etc.) and identify key information typically required for high-impact posters that is missing in the user brief.",
-            "2. FILTERING: Only ask for information that is NOT present in the brief and is critical for the visual composition (e.g., if phone is missing, ask for it; if it is there, do not ask).",
-            "3. CONSTRAINTS: Ask a maximum of 4 questions.",
-            "4. OUTPUT: Return JSON only with one key: 'questions' (array of objects: id, prompt, type, placeholder, options). Ensure the output is formatted as valid JSON.",
-            "5. TYPE: 'text' or 'single_choice'.",
-            "Keep prompts concise and in French.",
+            "You are a French-speaking creative brief clarifier for flyer generation.",
+            "Ask up to 4 high-impact questions focusing EXCLUSIVELY on visual and textual content for the flyer.",
+            "DO NOT ask about business activities, business models, or company details. Instead, ask for: flyer headlines, specific visual elements/imagery required, desired layout/style tone, exact CTA (Call to Action) wording, and essential copy points to display.",
+            "Return JSON only with one key: questions (array of objects: id, prompt, type, placeholder, options).",
+            "type is text or single_choice.",
+            "Keep prompts short and actionable in French.",
           ].join(" "),
       },
       {
@@ -1094,14 +1093,14 @@ export async function generateRefinementQuestions(input: {
 }
 
 function getDimensions(format: GenerationFormat): { width: number; height: number } {
-  // Base 1024x1024 = 1,048,576 pixels (~1MP)
+  // Reduced to approx 1MP or less to control costs
   switch (format) {
     case "story":
-      return { width: 768, height: 1344 }; // ~1.03 MP, ratio 9:16
+      return { width: 576, height: 1024 }; // ~0.59 MP
     case "print":
-      return { width: 896, height: 1152 }; // ~1.03 MP, ratio 3:4
+      return { width: 672, height: 896 }; // ~0.6 MP
     default:
-      return { width: 1024, height: 1024 }; // 1 MP, ratio 1:1
+      return { width: 768, height: 768 }; // ~0.59 MP
   }
 }
 
@@ -1157,14 +1156,17 @@ export async function generateImage(input: {
       }
     }
     if (!contentImageDataUrl && typeof contentParts === "string") {
-      const markdownMatch = contentParts.match(/!\[[^\]]*\]\((https?:\/\/[^\s)]+)\)/i);
-      const directUrlMatch = contentParts.match(/https?:\/\/[^\s"]+\.(?:png|jpg|jpeg|webp)(?:\?[^\s"]*)?/i);
+      const markdownMatch = contentParts.match(/!\[[^\]]*\]\(([^)]+)\)/i);
+      const directUrlMatch = contentParts.match(/(?:https?:\/\/|sandbox:)[^\s"]+\.(?:png|jpg|jpeg|webp)(?:\?[^\s"]*)?/i);
       const dataUrlMatch = contentParts.match(/data:image\/(?:png|jpeg|jpg|webp);base64,[A-Za-z0-9+/=]+/i);
-      const jsonUrlMatch = contentParts.match(/"url"\s*:\s*"(https?:\/\/[^"]+)"/i);
+      const jsonUrlMatch = contentParts.match(/"url"\s*:\s*"([^"]+)"/i);
+      const sandboxMatch = contentParts.match(/sandbox:[^\s)]+/i);
+
       contentImageDataUrl =
         dataUrlMatch?.[0] ??
         markdownMatch?.[1] ??
         directUrlMatch?.[0] ??
+        sandboxMatch?.[0] ??
         jsonUrlMatch?.[1];
     }
     const finalImageDataUrl = imageDataUrl ?? contentImageDataUrl ?? findImageCandidate(response);

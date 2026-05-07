@@ -1,6 +1,7 @@
 import styles from "./dashboard.module.css";
 import sharedStyles from "../shared-page.module.css";
 import Link from "next/link";
+import { MainNavigation } from "@/components/main-navigation";
 import { requireUser, computeQuotaSnapshot, isProfileOnboardingComplete } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { getPlanDefinition } from "@/lib/plans";
@@ -44,18 +45,6 @@ export default async function DashboardPage() {
 
   return (
     <main className={sharedStyles.page}>
-      <header className={sharedStyles.topbar}>
-        <Link href="/" className={sharedStyles.logo}>
-          ASMODRA
-        </Link>
-        <nav className={sharedStyles.nav}>
-          <Link href="/generate">Studio</Link>
-          <Link href="/pricing">Tarifs</Link>
-          <Link href="/flyers">Galerie</Link>
-          {viewer.profile.role === "admin" && <Link href="/admin">Admin</Link>}
-        </nav>
-      </header>
-
       <div className={styles.dashboardPage}>
         <header className={styles.hero}>
           <Reveal className={styles.heroContent}>
@@ -71,6 +60,15 @@ export default async function DashboardPage() {
                   <line x1="5" y1="12" x2="19" y2="12"></line>
                 </svg>
                 Créer une nouvelle affiche
+              </Link>
+              <Link href="/generate" className={styles.prominentCta}>
+                <span className={styles.ctaBadge}>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style={{ display: 'inline', marginRight: '0.4rem' }}>
+                    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+                  </svg>
+                  NOUVEAU
+                </span>
+                <span>Créer mon premier flyer gratuitement</span>
               </Link>
             </div>
           </Reveal>

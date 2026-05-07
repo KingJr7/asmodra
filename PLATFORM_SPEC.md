@@ -26,14 +26,14 @@ Objectif: produire rapidement des visuels marketing de qualité, prêts à publi
 
 ## 5) Offre commerciale
 ## Freemium
-- **Gratuit**: 30 crédits / mois
+- **Gratuit**: 8 crédits / mois (~1 génération)
 - **Watermark**: oui sur le plan gratuit
 
 ## Abonnements payants
-- **Pro**: 15 000 FCFA / mois, 260 crédits / mois
-- **Business**: 35 000 FCFA / mois, 760 crédits / mois
+- **Pro**: 15 000 FCFA / mois, 250 crédits / mois
+- **Business**: 25 000 FCFA / mois, 480 crédits / mois (~60 générations / mois)
 - **Renouvellement**: manuel (pas d’auto-renouvellement en V1)
-- **Packs crédits**: Top-up 5 (1 000 FCFA), Pack 35 (5 000 FCFA), Pack 80 (10 000 FCFA), Pack 180 (20 000 FCFA)
+- **Packs crédits**: One-shot (500 FCFA, 8 crédits), Micro Recharge (2 000 FCFA, 40 crédits), Pack Créateur (5 000 FCFA, 120 crédits), Pack Business (10 000 FCFA, 250 crédits), Pack Volume (20 000 FCFA, 550 crédits)
 
 ## 6) Paiements
 - **Méthodes**: Airtel Money + MTN Mobile Money

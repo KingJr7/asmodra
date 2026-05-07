@@ -1,4 +1,5 @@
 import styles from "../../shared-page.module.css";
+import { MainNavigation } from "@/components/main-navigation";
 import Link from "next/link";
 
 export default function MentionsPage() {
@@ -8,10 +9,7 @@ export default function MentionsPage() {
         <Link href="/" className={styles.logo}>
           ASMODRA
         </Link>
-        <nav className={styles.nav}>
-          <a href="/legal/cgu">CGU</a>
-          <a href="/legal/privacy">Confidentialité</a>
-        </nav>
+        <MainNavigation currentUser={true} />
       </header>
 
       <section className={styles.shell}>

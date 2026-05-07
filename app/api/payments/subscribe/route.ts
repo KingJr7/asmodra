@@ -17,6 +17,7 @@ const paymentSchema = z.object({
   planId: z.enum([
     "pro",
     "business",
+    "credits_pack_oneshot",
     "credits_topup",
     "credits_pack_small",
     "credits_pack_medium",

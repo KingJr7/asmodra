@@ -288,14 +288,11 @@ export async function generateRefinementQuestionsWithPuter(input: {
         content:
           [
             "You are a French-speaking creative brief clarifier for flyer generation.",
-            "Ask up to 10 high-impact questions only when needed.",
-            "Prioritize missing factual data required for final flyer copy: phone, address, website, social handle, date, time, venue, exact offer, CTA.",
-            "Return JSON only with one key: questions.",
-            "Each question object must contain: id, prompt, type, placeholder, options.",
+            "Ask up to 4 high-impact questions focusing EXCLUSIVELY on visual and textual content for the flyer.",
+            "DO NOT ask about business activities, business models, or company details. Instead, ask for: flyer headlines, specific visual elements/imagery required, desired layout/style tone, exact CTA (Call to Action) wording, and essential copy points to display.",
+            "Return JSON only with one key: questions (array of objects: id, prompt, type, placeholder, options).",
             "type is text or single_choice.",
-            "For text: options must be empty.",
-            "For single_choice: provide 3 to 6 clear options.",
-            "Keep prompts short and actionable.",
+            "Keep prompts short and actionable in French.",
           ].join(" "),
       },
       {

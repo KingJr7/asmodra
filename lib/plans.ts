@@ -1,5 +1,10 @@
 export type PlanId = "starter" | "pro" | "business";
-export type CreditPackId = "credits_topup" | "credits_pack_small" | "credits_pack_medium" | "credits_pack_large";
+export type CreditPackId =
+  | "credits_pack_oneshot"
+  | "credits_topup"
+  | "credits_pack_small"
+  | "credits_pack_medium"
+  | "credits_pack_large";
 export type StoreItemId = PlanId | CreditPackId;
 
 export type PlanDefinition = {
@@ -25,11 +30,11 @@ export const PLAN_DEFINITIONS: Record<PlanId, PlanDefinition> = {
     id: "starter",
     name: "Starter",
     monthlyPriceXaf: 0,
-    monthlyQuota: 20,
+    monthlyQuota: 8,
     watermark: true,
     description: "Ideal pour tester la puissance d'Asmodra sans frais.",
     perks: [
-      "~2 à 3 générations",
+      "8 crédits (~1 génération)",
       "Signature Asmodra obligatoire",
       "Accès au Studio standard",
     ],
@@ -37,7 +42,7 @@ export const PLAN_DEFINITIONS: Record<PlanId, PlanDefinition> = {
   pro: {
     id: "pro",
     name: "Pro",
-    monthlyPriceXaf: 10000,
+    monthlyPriceXaf: 15000,
     monthlyQuota: 250,
     watermark: false,
     description: "Pour les indépendants et créateurs sérieux.",
@@ -52,11 +57,11 @@ export const PLAN_DEFINITIONS: Record<PlanId, PlanDefinition> = {
     id: "business",
     name: "Business",
     monthlyPriceXaf: 25000,
-    monthlyQuota: 650,
+    monthlyQuota: 480,
     watermark: false,
     description: "Pour les agences et commerces à fort volume.",
     perks: [
-      "~81 générations",
+      "~60 générations",
       "Sans signature Asmodra",
       "Toutes les fonctionnalités Pro",
       "Générations haute priorité",
@@ -68,6 +73,13 @@ export const PLAN_DEFINITIONS: Record<PlanId, PlanDefinition> = {
 export const PLAN_LIST = Object.values(PLAN_DEFINITIONS);
 
 export const CREDIT_PACK_DEFINITIONS: Record<CreditPackId, CreditPackDefinition> = {
+  credits_pack_oneshot: {
+    id: "credits_pack_oneshot",
+    name: "One-shot",
+    priceXaf: 500,
+    credits: 8,
+    description: "1 génération rapide pour un besoin ponctuel.",
+  },
   credits_topup: {
     id: "credits_topup",
     name: "Micro Recharge",

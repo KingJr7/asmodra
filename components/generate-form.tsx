@@ -1,12 +1,99 @@
 "use client";
 
-import { useMemo, useState, type FormEvent } from "react";
+import { useMemo, useState, useEffect, type FormEvent } from "react";
 import Image from "next/image";
 import type { GenerationRefinementQuestion, ReferenceKind } from "@/lib/types";
 import { computeCreditsCost } from "@/lib/credits";
 import { ReferenceGallery } from "./reference-gallery";
+import { CreditPurchaseModal } from "./credit-purchase-modal";
 import styles from "./forms.module.css";
 import { Reveal } from "./motion/reveal";
+
+// SVG Icon renderer
+const getModuleIcon = (iconName: string) => {
+  const iconProps = {
+    width: "24",
+    height: "24",
+    viewBox: "0 0 24 24",
+    fill: "none",
+    stroke: "currentColor",
+    strokeWidth: "2",
+    strokeLinecap: "round" as const,
+    strokeLinejoin: "round" as const,
+  };
+
+  switch (iconName) {
+    case "target":
+      return (
+        <svg {...iconProps}>
+          <circle cx="12" cy="12" r="10" />
+          <circle cx="12" cy="12" r="6" />
+          <circle cx="12" cy="12" r="2" />
+        </svg>
+      );
+    case "palette":
+      return (
+        <svg {...iconProps}>
+          <circle cx="12" cy="12" r="10" />
+          <circle cx="7" cy="7" r="2" fill="currentColor" />
+          <circle cx="17" cy="7" r="2" fill="currentColor" />
+          <circle cx="7" cy="17" r="2" fill="currentColor" />
+          <circle cx="17" cy="17" r="2" fill="currentColor" />
+        </svg>
+      );
+    case "camera":
+      return (
+        <svg {...iconProps}>
+          <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" />
+          <circle cx="12" cy="13" r="4" />
+        </svg>
+      );
+    case "package":
+      return (
+        <svg {...iconProps}>
+          <line x1="16.5" y1="9.4" x2="7.5" y2="4.21" />
+          <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" />
+          <polyline points="3.27 6.96 12 12.01 20.73 6.96" />
+          <line x1="12" y1="22.08" x2="12" y2="12" />
+        </svg>
+      );
+    case "lightbulb":
+      return (
+        <svg {...iconProps}>
+          <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+        </svg>
+      );
+    case "scroll":
+      return (
+        <svg {...iconProps}>
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+          <polyline points="14 2 14 8 20 8" />
+        </svg>
+      );
+    case "sparkles":
+      return (
+        <svg {...iconProps}>
+          <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" fill="currentColor" />
+        </svg>
+      );
+    case "tool":
+      return (
+        <svg {...iconProps}>
+          <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 1 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z" />
+        </svg>
+      );
+    case "image":
+      return (
+        <svg {...iconProps}>
+          <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+          <circle cx="8.5" cy="8.5" r="1.5" />
+          <polyline points="21 15 16 10 5 21" />
+        </svg>
+      );
+    default:
+      return <div />;
+  }
+};
 
 type GenerateFormProps = {
   quotaRemaining: number;
@@ -24,6 +111,36 @@ export function GenerateForm({ quotaRemaining, watermarkEnabled, isAdmin }: Gene
   const [loading, setLoading] = useState(false);
   const [questionLoading, setQuestionLoading] = useState(false);
   const [generationDone, setGenerationDone] = useState(false);
+  const [showCreditModal, setShowCreditModal] = useState(false);
+  const [creditsNeeded, setCreditsNeeded] = useState(0);
+  const [loadingStep, setLoadingStep] = useState(0);
+
+  // Add this effect to cycle through loading steps
+  useEffect(() => {
+    if (!loading) {
+      setLoadingStep(0);
+      return;
+    }
+    const steps = [
+      "Analyse stratégique...",
+      "Assemblage visuel...",
+      "Application du style...",
+      "Traitement des textures...",
+      "Finalisation..."
+    ];
+    const interval = setInterval(() => {
+      setLoadingStep((prev) => (prev < steps.length - 1 ? prev + 1 : prev));
+    }, 4000); // Change step every 4 seconds
+    return () => clearInterval(interval);
+  }, [loading]);
+
+  const loadingSteps = [
+    "Analyse stratégique...",
+    "Assemblage visuel...",
+    "Application du style...",
+    "Traitement des textures...",
+    "Finalisation..."
+  ];
   
   // Form state for cost calculation
   const [format, setFormat] = useState<"square" | "story" | "print">("square");
@@ -98,7 +215,10 @@ export function GenerateForm({ quotaRemaining, watermarkEnabled, isAdmin }: Gene
 
   function normalizeError(message: string) {
     if (message.includes("RATE_LIMITED")) return "Trop d'essais. Attends un peu.";
-    if (message.includes("QUOTA_EXCEEDED")) return "Crédits insuffisants.";
+    if (message.includes("QUOTA_EXCEEDED")) {
+      // Don't return here, we'll handle it specially
+      return "QUOTA_EXCEEDED";
+    }
     return message;
   }
 
@@ -143,7 +263,15 @@ export function GenerateForm({ quotaRemaining, watermarkEnabled, isAdmin }: Gene
       setLoading(false);
       
       if (!response.ok) {
-        setError(normalizeError(payload.error ?? "Erreur de génération."));
+        const errorMsg = normalizeError(payload.error ?? "Erreur de génération.");
+        if (errorMsg === "QUOTA_EXCEEDED") {
+          // Show credit purchase modal
+          setCreditsNeeded(estimatedCost.total);
+          setShowCreditModal(true);
+          setError("");
+        } else {
+          setError(errorMsg);
+        }
         return;
       }
 
@@ -288,7 +416,7 @@ export function GenerateForm({ quotaRemaining, watermarkEnabled, isAdmin }: Gene
         {/* Module 1: Le Message */}
         <div className={styles.formModule}>
           <div className={styles.moduleHeader}>
-            <div className={styles.moduleIcon}>🎯</div>
+            <div className={styles.moduleIcon}>{getModuleIcon("target")}</div>
             <span className={styles.moduleTitle}>Mission de l&apos;affiche</span>
           </div>
           
@@ -325,7 +453,7 @@ export function GenerateForm({ quotaRemaining, watermarkEnabled, isAdmin }: Gene
         {/* Module 2: Direction Artistique */}
         <div className={styles.formModule}>
           <div className={styles.moduleHeader}>
-            <div className={styles.moduleIcon}>🎨</div>
+            <div className={styles.moduleIcon}>{getModuleIcon("palette")}</div>
             <span className={styles.moduleTitle}>Direction Artistique</span>
           </div>
 
@@ -356,14 +484,14 @@ export function GenerateForm({ quotaRemaining, watermarkEnabled, isAdmin }: Gene
         {/* Module 3: Assets visuels */}
         <div className={styles.formModule}>
           <div className={styles.moduleHeader}>
-            <div className={styles.moduleIcon}>📸</div>
+            <div className={styles.moduleIcon}>{getModuleIcon("camera")}</div>
             <span className={styles.moduleTitle}>Tes ressources</span>
           </div>
 
           <ReferenceGallery
             kind="logo"
             label="Logo Professionnel"
-            icon="📦"
+            icon="package"
             selectedIds={selectedLogos}
             onSelectionChange={setSelectedLogos}
           />
@@ -371,7 +499,7 @@ export function GenerateForm({ quotaRemaining, watermarkEnabled, isAdmin }: Gene
           <ReferenceGallery
             kind="product"
             label="Photos Produit"
-            icon="📸"
+            icon="camera"
             selectedIds={selectedProducts}
             onSelectionChange={setSelectedProducts}
           />
@@ -379,7 +507,7 @@ export function GenerateForm({ quotaRemaining, watermarkEnabled, isAdmin }: Gene
           <ReferenceGallery
             kind="style_guide"
             label="Guide de Style"
-            icon="💡"
+            icon="lightbulb"
             selectedIds={selectedStyleGuides}
             onSelectionChange={setSelectedStyleGuides}
           />
@@ -412,7 +540,7 @@ export function GenerateForm({ quotaRemaining, watermarkEnabled, isAdmin }: Gene
         {debugPrompt && (
           <Reveal className={styles.formModule} style={{ border: '1px solid var(--accent)', background: 'rgba(210, 187, 255, 0.05)' }}>
             <div className={styles.moduleHeader}>
-              <div className={styles.moduleIcon}>📜</div>
+              <div className={styles.moduleIcon}>{getModuleIcon("scroll")}</div>
               <span className={styles.moduleTitle}>Prompt Technique (Debug)</span>
             </div>
             <pre style={{ 
@@ -441,7 +569,7 @@ export function GenerateForm({ quotaRemaining, watermarkEnabled, isAdmin }: Gene
         )}
 
         <p className={styles.hint}>
-          Crédits disponibles: <strong>{quotaRemaining}</strong> • Coût estimé: <strong>{estimatedCost.total}</strong> crédits • Signature Asmodra: <strong>{watermarkEnabled ? "Oui" : "Non"}</strong>
+          Affiches disponibles: <strong>{Math.floor(quotaRemaining / 8)}</strong> • Coût estimé: <strong>{Math.floor(estimatedCost.total / 8)}</strong> affiche{Math.floor(estimatedCost.total / 8) > 1 ? "s" : ""} • Signature Asmodra: <strong>{watermarkEnabled ? "Oui" : "Non"}</strong>
         </p>
 
         {error && <p className={styles.error}>{error}</p>}
@@ -452,7 +580,7 @@ export function GenerateForm({ quotaRemaining, watermarkEnabled, isAdmin }: Gene
         <div className={styles.modalBackdrop}>
           <Reveal className={styles.modalCard}>
             <div className={styles.moduleHeader}>
-              <div className={styles.moduleIcon}>💡</div>
+              <div className={styles.moduleIcon}>{getModuleIcon("lightbulb")}</div>
               <span className={styles.moduleTitle}>Précision nécessaire</span>
             </div>
             <p className={styles.modalQuestion}>{currentQuestion.prompt}</p>
@@ -483,7 +611,7 @@ export function GenerateForm({ quotaRemaining, watermarkEnabled, isAdmin }: Gene
         <Reveal className={styles.preview}>
           <div className={styles.panel}>
             <div className={styles.moduleHeader}>
-              <div className={styles.moduleIcon}>✨</div>
+              <div className={styles.moduleIcon}>{getModuleIcon("sparkles")}</div>
               <span className={styles.moduleTitle}>Ton chef-d&apos;œuvre est prêt</span>
             </div>
             <button type="button" className={styles.previewZoomButton} onClick={() => setPreviewOpen(true)}>
@@ -496,7 +624,7 @@ export function GenerateForm({ quotaRemaining, watermarkEnabled, isAdmin }: Gene
 
             <div className={styles.formModule} style={{ marginTop: '2rem' }}>
               <div className={styles.moduleHeader}>
-                <div className={styles.moduleIcon}>🛠️</div>
+                <div className={styles.moduleIcon}>{getModuleIcon("tool")}</div>
                 <span className={styles.moduleTitle}>Retouches rapides</span>
               </div>
               <textarea className={styles.textarea} value={revisionNote} onChange={e => setRevisionNote(e.target.value)} placeholder="Un changement ? Dis-nous tout..." />
@@ -532,17 +660,34 @@ export function GenerateForm({ quotaRemaining, watermarkEnabled, isAdmin }: Gene
           <div className={styles.generationCard}>
             <div className={styles.generationOrb} />
             <p className={styles.generationTitle}>
-              {generationDone ? "Finalisation..." : questionLoading ? "Analyse stratégique..." : "Forge créative en cours..."}
+              {generationDone 
+                ? "Finalisation..." 
+                : questionLoading 
+                  ? "Analyse stratégique..." 
+                  : loadingSteps[loadingStep]
+              }
             </p>
             <p className={styles.generationText}>
-              L&apos;IA assemble les textures, la lumière et ta typographie pour un résultat exceptionnel.
+              {generationDone 
+                ? "Presque prêt !" 
+                : questionLoading 
+                  ? "Nous préparons les meilleures questions pour affiner ta vision."
+                  : "L&apos;IA assemble les textures, la lumière et ta typographie pour un résultat exceptionnel."
+              }
             </p>
             <div className={styles.generationTrack}>
-              <div className={styles.generationFill} />
+              <div className={styles.generationFill} style={{ width: `${((loadingStep + 1) / loadingSteps.length) * 100}%` }} />
             </div>
           </div>
         </div>
       )}
+
+      {/* Credit Purchase Modal */}
+      <CreditPurchaseModal
+        isOpen={showCreditModal}
+        creditsNeeded={creditsNeeded}
+        onClose={() => setShowCreditModal(false)}
+      />
     </div>
   );
 }

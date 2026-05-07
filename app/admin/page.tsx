@@ -1,5 +1,6 @@
 import styles from "../shared-page.module.css";
 import Link from "next/link";
+import { MainNavigation } from "@/components/main-navigation";
 import { requireAdmin } from "@/lib/auth";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { AdminUserTable } from "@/components/admin-user-table";
@@ -50,11 +51,7 @@ export default async function AdminPage() {
         <Link href="/" className={styles.logo}>
           ASMODRA
         </Link>
-        <nav className={styles.nav}>
-          <a href="/dashboard">Mon espace</a>
-          <a href="/pricing">Tarifs</a>
-          <a href="/support">Support</a>
-        </nav>
+        <MainNavigation currentUser={true} isAdmin={true} />
       </header>
 
       <section className={styles.shell}>

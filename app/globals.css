@@ -1,13 +1,38 @@
 :root {
-  --background: #0b0712;
-  --foreground: #f0e8ff;
-  --paper: #181123;
-  --paper-soft: #231933;
-  --ink-soft: #c5b8dc;
+  --bg-primary: #ffffff;
+  --bg-secondary: #faf8ff;
+  --bg-tertiary: #f2eefc;
+  --bg-elevated: #ffffff;
+  --text-primary: #121021;
+  --text-secondary: #59557a;
+  --text-tertiary: #8a88a1;
+  --text-light: #faf8ff;
+  --accent-primary: #7f52d6;
+  --accent-primary-strong: #6f43c8;
+  --accent-light: #d8c2ff;
+  --accent-lighter: #efe8ff;
+  --success: #4ade80;
+  --warning: #fbbf24;
+  --error: #ef4444;
+  --info: #3b82f6;
+  --border-light: #e9e4f5;
+  --border-medium: #d8cfee;
+  --radius-sm: 12px;
+  --radius-md: 20px;
+  --radius-lg: 32px;
+  --shadow-sm: 0 4px 12px rgba(46, 25, 95, 0.04);
+  --shadow-md: 0 10px 30px rgba(58, 35, 109, 0.08);
+  --shadow-lg: 0 20px 60px rgba(66, 42, 119, 0.12);
+
+  --background: #ffffff;
+  --foreground: #18152a;
+  --paper: #faf8ff;
+  --paper-soft: #f2eefc;
+  --ink-soft: #666666;
   --accent: #d8c2ff;
-  --accent-deep: #7f52d6;
-  --line: #3a2e50;
-  --line-strong: #5d4b7f;
+  --accent-deep: #6f43c8;
+  --line: #e9e4f5;
+  --line-strong: #d8cfee;
 }
 
 html {
@@ -25,11 +50,11 @@ body {
   min-height: 100%;
   display: flex;
   flex-direction: column;
-  color: var(--foreground);
+  color: var(--text-primary);
   background:
-    radial-gradient(circle at 8% 14%, rgba(123, 208, 255, 0.1), transparent 28%),
-    radial-gradient(circle at 92% 20%, rgba(124, 58, 237, 0.24), transparent 32%),
-    linear-gradient(165deg, #09050f 0%, #120b1e 42%, #08060d 100%);
+    radial-gradient(circle at 10% -5%, rgba(127, 82, 214, 0.12) 0%, transparent 34%),
+    radial-gradient(circle at 90% 0%, rgba(178, 149, 255, 0.1) 0%, transparent 30%),
+    linear-gradient(180deg, #ffffff 0%, #fcfaff 45%, #ffffff 100%);
   font-family: var(--font-body), sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -47,14 +72,14 @@ body::after {
 
 body::before {
   background:
-    radial-gradient(circle at 25% 45%, rgba(123, 208, 255, 0.08), transparent 30%),
-    radial-gradient(circle at 78% 60%, rgba(255, 107, 0, 0.06), transparent 24%);
-  mix-blend-mode: screen;
+    radial-gradient(circle at 14% 18%, rgba(127, 82, 214, 0.08), transparent 45%),
+    radial-gradient(circle at 88% 82%, rgba(216, 194, 255, 0.08), transparent 42%);
+  mix-blend-mode: normal;
 }
 
 body::after {
-  opacity: 0.16;
-  background-image: radial-gradient(rgba(255, 255, 255, 0.9) 0.4px, transparent 0.4px);
+  opacity: 0.2;
+  background-image: radial-gradient(rgba(31, 17, 63, 0.04) 0.6px, transparent 0.6px);
   background-size: 3px 3px;
 }
 
@@ -70,5 +95,6 @@ a {
 }
 
 ::selection {
-  background: rgba(216, 194, 255, 0.34);
+  background: rgba(127, 82, 214, 0.2);
+  color: var(--text-primary);
 }

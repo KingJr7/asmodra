@@ -55,16 +55,16 @@ export default async function GeneratePage() {
           <small>{viewer.profile.plan_id?.toUpperCase() || "STARTER"} PLAN</small>
         </div>
         <nav className={styles.sidebarNav}>
-          <Link href="/dashboard">Dashboard</Link>
-          <Link href="/generate" className={styles.sidebarActive}>Studio</Link>
+          <Link href="/dashboard">Mes projets</Link>
+          <Link href="/generate" className={styles.sidebarActive}>Créer un flyer</Link>
           <Link href="/flyers">Galerie</Link>
-          <Link href="/pricing">Tarifs</Link>
+          <Link href="/pricing">Tarifs & Crédits</Link>
         </nav>
       </aside>
 
       <main className={styles.canvas}>
         <Reveal className={styles.pageHead}>
-          <span style={{ color: 'var(--accent)', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.2em', fontSize: '0.8rem' }}>Atelier de création</span>
+          <span className={styles.headKicker}>Atelier de création</span>
           <h1>Studio Créatif</h1>
           <p>Donne vie à tes idées. Asmodra fusionne stratégie marketing et direction artistique pour tes visuels.</p>
         </Reveal>
@@ -95,18 +95,18 @@ export default async function GeneratePage() {
                   </button>
                 ))}
               </div>
-              <p style={{ marginTop: '1.5rem', fontSize: '0.8rem', color: '#717082', fontStyle: 'italic' }}>
+              <p className={styles.presetHint}>
                 L&apos;IA adapte sa composition selon le style choisi.
               </p>
             </Reveal>
 
             {/* Quick Stats / Feedback */}
             <Reveal className={styles.presetPanel} style={{ marginTop: '1.5rem' }} delay={0.2}>
-              <h3>Tes crédits</h3>
-              <div style={{ fontSize: '1.5rem', fontWeight: 900, color: '#fff' }}>{quota.quota_remaining}</div>
-              <p style={{ fontSize: '0.8rem', color: '#717082' }}>Rechargeable à tout moment.</p>
-              <Link href="/pricing" style={{ display: 'block', marginTop: '1rem', fontSize: '0.8rem', color: 'var(--accent)', fontWeight: 700, textDecoration: 'none' }}>
-                Prendre plus de crédits →
+              <h3>Tes affiches</h3>
+              <div className={styles.creditsValue}>{Math.floor(quota.quota_remaining / 8)}</div>
+              <p className={styles.creditsText}>génération{Math.floor(quota.quota_remaining / 8) > 1 ? "s possible" : " possible"}</p>
+              <Link href="/pricing" className={styles.creditsLink}>
+                Prendre plus d'affiches →
               </Link>
             </Reveal>
           </aside>
@@ -140,14 +140,6 @@ export default async function GeneratePage() {
           </Reveal>
         )}
       </main>
-
-      {/* Mobile Navigation Dock */}
-      <nav className={styles.mobileDock}>
-        <Link href="/dashboard">Dashboard</Link>
-        <Link href="/generate" className={styles.mobileActive}>Studio</Link>
-        <Link href="/flyers">Galerie</Link>
-        <Link href="/pricing">Tarifs</Link>
-      </nav>
     </div>
   );
 }

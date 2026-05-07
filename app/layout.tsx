@@ -20,6 +20,10 @@ export const metadata: Metadata = {
     "Asmodra permet de créer des flyers professionnels par IA en quelques secondes.",
 };
 
+import { Navbar } from "@/components/navbar";
+
+// ... (imports)
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -27,7 +31,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="fr" className={`${display.variable} ${body.variable}`}>
-      <body>{children}</body>
+      <body>
+        <Navbar />
+        {children}
+      </body>
     </html>
   );
 }
