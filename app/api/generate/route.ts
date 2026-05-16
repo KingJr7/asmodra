@@ -441,7 +441,7 @@ export async function POST(request: Request) {
     const rawOutputBuffer = await imageDataUrlOrHttpToBuffer(finalImage);
     const outputBuffer = await sharp(rawOutputBuffer)
       .resize({ width: 1600, withoutEnlargement: true })
-      .png({ compressionLevel: 9, quality: 78, palette: true, effort: 8 })
+      .png({ compressionLevel: 6, quality: 85, palette: true, effort: 2 })
       .toBuffer();
     const outputDataUrl = `data:image/png;base64,${outputBuffer.toString("base64")}`;
     const outputPath = `${user.id}/output/${Date.now()}-${hashString(product).slice(0, 12)}.png`;

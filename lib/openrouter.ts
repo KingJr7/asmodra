@@ -1175,7 +1175,7 @@ export async function generateImage(input: {
 
   const basePayload = {
     model: env.OPENROUTER_IMAGE_MODEL,
-    modalities: ["image", "text"],
+    modalities: ["image"],
     max_tokens: 400,
     stream: false,
     messages: [{ role: "user", content } satisfies OpenRouterMessage],
@@ -1188,15 +1188,18 @@ export async function generateImage(input: {
   let finalImageDataUrl: unknown;
   let response: Record<string, unknown> | undefined;
   try {
+    console.log("[openrouter] first attempt (modalities: image)");
     const firstTry = await requestImage(basePayload);
     finalImageDataUrl = firstTry.imageDataUrl;
     response = firstTry.response;
   } catch (error) {
     const message = error instanceof Error ? error.message : "";
+    console.log("[openrouter] first attempt failed:", message);
     if (
       message.includes("OPENROUTER_ERROR:404:") &&
       message.includes("output modalities: image, text")
     ) {
+      console.log("[openrouter] retrying with image-only modalities");
       const imageOnlyPayload = {
         ...basePayload,
         modalities: ["image"],
@@ -1210,9 +1213,10 @@ export async function generateImage(input: {
   }
 
   if (typeof finalImageDataUrl !== "string") {
+    console.log("[openrouter] image not found in response, trying fallback without references");
     const fallbackPayload = {
       model: env.OPENROUTER_IMAGE_MODEL,
-      modalities: ["image", "text"],
+      modalities: ["image"],
       max_tokens: 4000,
       stream: false,
       messages: [{ role: "user", content: input.finalPrompt }],
@@ -1227,6 +1231,7 @@ export async function generateImage(input: {
   }
 
   if (typeof finalImageDataUrl !== "string") {
+    console.log("[openrouter] still no image, checking if prompt is too long");
     const resObj = response as Record<string, unknown>;
     const choices = Array.isArray(resObj?.choices) ? resObj.choices as Array<Record<string, unknown>> : undefined;
     const message = choices?.[0]?.message;
@@ -1240,10 +1245,11 @@ export async function generateImage(input: {
       normalizedMessage.includes("simplify");
 
     if (looksTooLong) {
+      console.log("[openrouter] prompt too long, retrying with condensed prompt");
       const reducedPrompt = condenseImagePrompt(input.finalPrompt);
       const reducedPayload = {
         model: env.OPENROUTER_IMAGE_MODEL,
-        modalities: ["image", "text"],
+        modalities: ["image"],
         max_tokens: 4000,
         stream: false,
         messages: [{ role: "user", content: reducedPrompt }],
@@ -1259,6 +1265,7 @@ export async function generateImage(input: {
   }
 
   if (typeof finalImageDataUrl !== "string") {
+    console.log("[openrouter] final attempt: using openrouter:image_generation tool");
     const toolPrompt = [
       "Use the openrouter:image_generation tool immediately.",
       "Generate exactly one image from the following prompt.",
